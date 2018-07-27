@@ -1,0 +1,25 @@
+<resources>
+    <string name="app_name">Subcore</string>
+    <string name="on">ON</string>
+    <string name="off">OFF</string>
+    <string name="low_mem">Low Memory Device</string>
+    <string name="help_text">
+        Subcore is a daemon that systematically accesses various sensors and data files
+        from your system, and uses that information to optimize your device for
+        the workload it requires. This way, no CPU power needs to be wasted on
+        basic tasks that require as low as 70% of the CPU they are provided.
+        This, in turn, provides outstanding battery life at almost no cost. The
+        device will feel smooth as usual.
+        \n\nSubcore optimizes multiple aspects of the system, including:
+        \n- sysctl (kernel) tweaks
+        \n- block (storage) tweaks
+        \n- mm (memory) tweaks
+        \n- CPU tweaks, GPU tweaks
+        \n- scheduler tweaks
+        \n- and much more.
+        \n\nAfter disabling Subcore, you will need to reboot to get your original kernel
+        tweak settings back. This is because Subcore alters sysctl files.
+        \n\nThank you for using Subcore and supporting me and my hobby. Contact me
+        for criticism, compliments, concerns, or anything else!
+        </string>
+</resources>
