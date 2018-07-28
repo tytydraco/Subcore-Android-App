@@ -182,10 +182,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun killBin() {
-        if (binRunning())
-            runnableAsync(this, Runnable {
-                root.run("killall $bin", true)
-            }, false)
+        runnableAsync(this, Runnable {
+            root.run("killall $bin", true)
+        }, false)
     }
 
     private fun binRunning(): Boolean {
