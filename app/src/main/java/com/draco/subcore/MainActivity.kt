@@ -124,6 +124,12 @@ class MainActivity : AppCompatActivity() {
         lowMemSwitch.setOnCheckedChangeListener { _, isChecked ->
             editor.putBoolean("low_mem", isChecked)
             editor.apply()
+
+            AlertDialog.Builder(this)
+                    .setTitle("Toggle Required")
+                    .setMessage("To apply this change, you must turn Subcore OFF and back ON again.")
+                    .setPositiveButton("Ok", null)
+                    .show()
         }
 
         if (prefs.getBoolean("first_run", true)) {
@@ -165,7 +171,7 @@ class MainActivity : AppCompatActivity() {
         unregisterReceiver(runAsync)
     }
 
-    fun runBin() {
+    private fun runBin() {
         if (!binRunning())
             runnableAsync(this, Runnable {
                 var command = "setsid $pathBin &"
@@ -227,8 +233,7 @@ class MainActivity : AppCompatActivity() {
                 .setTitle("Unsupported Architecture")
                 .setMessage("Your device is unsupported (MIPS).")
                 .setPositiveButton("Ok", { _, _ ->
-                    android.os.Process.killProcess(android.os.Process.myPid())
-                    System.exit(1)
+                    finish()
                 })
                 .setCancelable(false)
                 .show()

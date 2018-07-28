@@ -16,9 +16,7 @@
         \n- mm (memory) tweaks
         \n- CPU tweaks, GPU tweaks
         \n- scheduler tweaks
-        \n- and much more.
-        \n\nAfter disabling Subcore, you will need to reboot to get your original kernel
-        tweak settings back. This is because Subcore alters sysctl files.
+        \n- and much more
         \n\nThank you for using Subcore and supporting me and my hobby. Contact me
         for criticism, compliments, concerns, or anything else!
         </string>
