@@ -13,8 +13,6 @@ import android.support.v7.app.AppCompatActivity
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.ImageButton
-import android.widget.Switch
-
 
 class MainActivity : AppCompatActivity() {
 
@@ -24,12 +22,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var paypalButton: ImageButton
     private lateinit var lowMemSwitch: CheckBox
 
-    lateinit var arch: String
-    lateinit var bin: String
-    lateinit var pathBin: String
+    private lateinit var arch: String
+    private lateinit var bin: String
+    private lateinit var pathBin: String
 
-    lateinit var prefs: SharedPreferences
-    lateinit var editor: SharedPreferences.Editor
+    private lateinit var prefs: SharedPreferences
+    private lateinit var editor: SharedPreferences.Editor
 
     companion object {
         lateinit var fetching_dialog: AlertDialog.Builder
@@ -142,30 +140,6 @@ class MainActivity : AppCompatActivity() {
         lowMemSwitch.isChecked = prefs.getBoolean("low_mem", false)
     }
 
-    public override fun onResume() {
-        super.onResume()
-        fetching_dialog_create.show()
-        runnableAsync(this, Runnable {
-            arch = getArchitecture()
-            verifyCompat()
-
-            bin = getBinName()
-            pathBin = getBinPath()
-
-            runOnUiThread {
-                // set the UI elements
-                if (binRunning()) {
-                    toggleButton.background = ContextCompat.getDrawable(MainActivity@this, R.drawable.rounded_drawable_green)
-                    toggleButton.text = resources.getText(R.string.on)
-                } else {
-                    toggleButton.background = ContextCompat.getDrawable(MainActivity@this, R.drawable.rounded_drawable_red)
-                    toggleButton.text = resources.getText(R.string.off)
-                }
-            }
-            stopLoading()
-        }, false)
-    }
-
     public override fun onDestroy() {
         super.onDestroy()
         unregisterReceiver(runAsync)
@@ -188,8 +162,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun binRunning(): Boolean {
-        val status = root.run("[ `pgrep $bin` ] && echo RUNNING || echo STOPPED", true)
-        return status.contains("RUNNING")
+        val status = root.run("[ `pgrep $bin` ] && echo 1 || echo 0", true)
+        return status.contains("1")
     }
 
     private fun writeBin() {
@@ -200,17 +174,17 @@ class MainActivity : AppCompatActivity() {
             "x86_64" -> resources.openRawResource(R.raw.subcore_x86_64)
             else -> resources.openRawResource(R.raw.subcore_arm)
         }
-        try {
-            val buffer = ByteArray(ins.available())
-            ins.read(buffer)
-            ins.close()
-            val fos = openFileOutput("subcore_arm64", Context.MODE_PRIVATE)
-            fos.write(buffer)
-            fos.close()
 
-            val file = getFileStreamPath("subcore_arm64")
-            file.setExecutable(true)
-        } catch (e: Exception) {}
+        val binName = getBinName()
+        val buffer = ByteArray(ins.available())
+        ins.read(buffer)
+        ins.close()
+        val fos = openFileOutput(binName, Context.MODE_PRIVATE)
+        fos.write(buffer)
+        fos.close()
+
+        val file = getFileStreamPath(binName)
+        file.setExecutable(true)
     }
 
     private fun getArchitecture(): String {
