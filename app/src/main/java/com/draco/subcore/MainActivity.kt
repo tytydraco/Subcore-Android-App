@@ -179,12 +179,14 @@ class MainActivity : AppCompatActivity() {
         val buffer = ByteArray(ins.available())
         ins.read(buffer)
         ins.close()
-        val fos = openFileOutput(binName, Context.MODE_PRIVATE)
-        fos.write(buffer)
-        fos.close()
+        try {
+            val fos = openFileOutput(binName, Context.MODE_PRIVATE)
+            fos.write(buffer)
+            fos.close()
 
-        val file = getFileStreamPath(binName)
-        file.setExecutable(true)
+            val file = getFileStreamPath(binName)
+            file.setExecutable(true)
+        } catch (e: Exception) {}
     }
 
     private fun getArchitecture(): String {
