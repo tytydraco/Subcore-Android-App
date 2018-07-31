@@ -1,15 +1,18 @@
 package com.draco.subcore
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.SharedPreferences
+import android.graphics.drawable.TransitionDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
+import android.view.animation.AnimationUtils
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.ImageButton
@@ -28,6 +31,8 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var prefs: SharedPreferences
     private lateinit var editor: SharedPreferences.Editor
+
+    private var running = false
 
     companion object {
         lateinit var fetching_dialog: AlertDialog.Builder
@@ -54,17 +59,17 @@ class MainActivity : AppCompatActivity() {
         prefs = getSharedPreferences("subcore", Context.MODE_PRIVATE)
         editor = prefs.edit()
 
-        root.checkRoot()
-
         fetching_dialog = AlertDialog.Builder(this)
                 .setTitle("Loading")
                 .setMessage("Subcore is processing information. Please be patient.")
                 .setCancelable(false)
 
         fetching_dialog_create = fetching_dialog.create()
-        fetching_dialog_create.show()
+        toggleButton.isEnabled = false
 
         runnableAsync(this, Runnable {
+            root.checkRoot()
+
             arch = getArchitecture()
             verifyCompat()
 
@@ -74,33 +79,47 @@ class MainActivity : AppCompatActivity() {
             runOnUiThread {
                 // set the UI elements
                 if (binRunning()) {
+                    running = true
+                    lowMemSwitch.isEnabled = false
                     toggleButton.background = ContextCompat.getDrawable(MainActivity@this, R.drawable.rounded_drawable_green)
                     toggleButton.text = resources.getText(R.string.on)
                 } else {
+                    running = false
+                    lowMemSwitch.isEnabled = true
                     toggleButton.background = ContextCompat.getDrawable(MainActivity@this, R.drawable.rounded_drawable_red)
                     toggleButton.text = resources.getText(R.string.off)
                 }
             }
 
             writeBin()
-            stopLoading()
-        }, false)
+            toggleButton.isEnabled = true
+        }, true)
 
         toggleButton.setOnClickListener({
-            fetching_dialog_create.show()
+            val popAnim = AnimationUtils.loadAnimation(this, R.anim.pop)
+            toggleButton.startAnimation(popAnim)
+
+            toggleButton.background = ContextCompat.getDrawable(this, R.drawable.transition_enable_disable)
+            val transition = toggleButton.background as TransitionDrawable
+
+            if (running) {
+                transition.startTransition(300)
+            } else {
+                transition.reverseTransition(0)
+                transition.reverseTransition(300)
+            }
+
             runnableAsync(this, Runnable {
-                val running = binRunning()
                 if (running) {
                     killBin()
-                    stopLoading()
-                    toggleButton.background = ContextCompat.getDrawable(MainActivity@this, R.drawable.rounded_drawable_red)
                     toggleButton.text = resources.getText(R.string.off)
+                    lowMemSwitch.isEnabled = true
                 } else {
                     runBin()
-                    stopLoading()
-                    toggleButton.background = ContextCompat.getDrawable(MainActivity@this, R.drawable.rounded_drawable_green)
                     toggleButton.text = resources.getText(R.string.on)
+                    lowMemSwitch.isEnabled = false
                 }
+                running = !running
             }, true)
         })
 
@@ -119,15 +138,10 @@ class MainActivity : AppCompatActivity() {
             startActivity(browserIntent)
         }
 
-        lowMemSwitch.setOnCheckedChangeListener { _, isChecked ->
+        lowMemSwitch.setOnClickListener {
+            val isChecked = lowMemSwitch.isChecked
             editor.putBoolean("low_mem", isChecked)
             editor.apply()
-
-            AlertDialog.Builder(this)
-                    .setTitle("Toggle Required")
-                    .setMessage("To apply this change, you must turn Subcore OFF and back ON again.")
-                    .setPositiveButton("Ok", null)
-                    .show()
         }
 
         if (prefs.getBoolean("first_run", true)) {
@@ -146,13 +160,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun runBin() {
-        if (!binRunning())
-            runnableAsync(this, Runnable {
-                var command = "setsid $pathBin &"
-                if (prefs.getBoolean("low_mem", false))
-                    command += " -m"
-                root.run(command, true)
-            }, false)
+        runnableAsync(this, Runnable {
+            var extraArgs = ""
+            if (prefs.getBoolean("low_mem", false))
+                extraArgs += "-m "
+            //val command = "[ `pgrep $bin` ] || setsid $pathBin $extra_args &"
+            val command = "[ `pgrep $bin` ] || $pathBin $extraArgs &"
+            root.run(command, true)
+        }, false)
     }
 
     private fun killBin() {
@@ -162,7 +177,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun binRunning(): Boolean {
-        val status = root.run("[ `pgrep $bin` ] && echo 1 || echo 0", true)
+        val status = root.run("[ `pgrep $bin` ] && echo 1", true)
         return status.contains("1")
     }
 
@@ -190,7 +205,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun getArchitecture(): String {
-        return when (root.run("getprop ro.product.cpu.abi", true)) {
+        return when (getProp("ro.product.cpu.abi")) {
             "armeabi" -> "arm"
             "armeabi-v7a" -> "arm"
             "x86" -> "x86"
@@ -228,6 +243,17 @@ class MainActivity : AppCompatActivity() {
             "x86" -> "subcore_x86"
             "x86_64" -> "subcore_x86_64"
             else -> "subcore_arm"
+        }
+    }
+
+    @SuppressLint("PrivateApi")
+    private fun getProp(prop: String): String? {
+        return try {
+            val clazz = Class.forName("android.os.SystemProperties")
+            val method = clazz.getDeclaredMethod("get", java.lang.String::class.java)
+            method.invoke(null, prop) as String
+        } catch (e: Exception) {
+            ""
         }
     }
 

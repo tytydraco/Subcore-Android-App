@@ -1,20 +1,21 @@
 <resources>
     <string name="app_name">Subcore</string>
-    <string name="on">ON</string>
-    <string name="off">OFF</string>
+    <string name="on">STOP</string>
+    <string name="off">START</string>
     <string name="low_mem">Low Memory Device</string>
     <string name="help_text">
-        Subcore is a daemon that systematically accesses various sensors and data files
-        from your system, and uses that information to optimize your device for
-        the workload it requires. This way, no CPU power needs to be wasted on
-        basic tasks that require as low as 70% of the CPU they are provided.
-        This, in turn, provides outstanding battery life at almost no cost. The
+        Subcore is a daemon that systematically monitors various data input
+        from your system to optimize your device for a unique workload.
+        The goal is to conserve power that would rather be wasted on
+        basic tasks (which require much less power than they are provided).
+        This algorithm provides outstanding battery life at little cost. The
         device will feel smooth as usual.
         \n\nSubcore optimizes multiple aspects of the system, including:
         \n- sysctl (kernel) tweaks
         \n- block (storage) tweaks
         \n- mm (memory) tweaks
-        \n- CPU tweaks, GPU tweaks
+        \n- CPU tweaks
+        \n- GPU tweaks
         \n- scheduler tweaks
         \n- and much more
         \n\nThank you for using Subcore and supporting me and my hobby. Contact me

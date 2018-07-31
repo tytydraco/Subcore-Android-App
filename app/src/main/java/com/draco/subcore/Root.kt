@@ -44,7 +44,8 @@ class Root(var context: Context) {
             process.waitFor()
             return output.toString()
         } catch (e: Exception) {
-            rootErrorDialog()
+            println(e.message)
+            //rootErrorDialog()
         }
         return ""
     }
