@@ -27,7 +27,8 @@
         android:layout_marginBottom="3dp"
         android:layout_marginTop="3dp"
         android:id="@+id/apply_on_boot"
-        android:textSize="15sp" />
+        android:textSize="15sp"
+        android:enabled="false"/>
     <CheckBox
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -35,7 +36,8 @@
         android:layout_marginStart="10dp"
         android:layout_marginBottom="3dp"
         android:id="@+id/low_mem"
-        android:textSize="15sp"/>
+        android:textSize="15sp"
+        android:enabled="false"/>
     <CheckBox
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -43,7 +45,8 @@
         android:layout_marginStart="10dp"
         android:layout_marginBottom="3dp"
         android:id="@+id/disable_power_aware"
-        android:textSize="15sp"/>
+        android:textSize="15sp"
+        android:enabled="false"/>
 
     <ScrollView
         android:layout_width="match_parent"

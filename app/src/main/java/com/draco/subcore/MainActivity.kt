@@ -115,6 +115,7 @@ class MainActivity : AppCompatActivity() {
                         toggleButton.background = ContextCompat.getDrawable(MainActivity@this, R.drawable.rounded_drawable_red)
                         toggleButton.text = resources.getText(R.string.off)
                     }
+                    applyOnBoot.isEnabled = true
                 }
 
                 Utils.writeBin(this)
