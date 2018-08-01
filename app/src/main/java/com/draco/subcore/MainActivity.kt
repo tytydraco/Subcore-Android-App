@@ -9,13 +9,19 @@ import android.graphics.drawable.TransitionDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import android.view.animation.AnimationUtils
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.ImageButton
+import com.google.android.vending.licensing.AESObfuscator
+import com.google.android.vending.licensing.LicenseChecker
+import com.google.android.vending.licensing.LicenseCheckerCallback
+import com.google.android.vending.licensing.ServerManagedPolicy
 
 class MainActivity : AppCompatActivity() {
 
@@ -24,76 +30,94 @@ class MainActivity : AppCompatActivity() {
     private lateinit var gmailButton: ImageButton
     private lateinit var paypalButton: ImageButton
     private lateinit var lowMemSwitch: CheckBox
-
-    private lateinit var arch: String
-    private lateinit var bin: String
-    private lateinit var pathBin: String
-
-    private lateinit var prefs: SharedPreferences
-    private lateinit var editor: SharedPreferences.Editor
-
-    private var running = false
+    private lateinit var applyOnBoot: CheckBox
 
     companion object {
-        lateinit var fetching_dialog: AlertDialog.Builder
-        lateinit var fetching_dialog_create: AlertDialog
+        lateinit var arch: String
+        lateinit var bin: String
+        lateinit var pathBin: String
+
+        lateinit var prefs: SharedPreferences
+        lateinit var editor: SharedPreferences.Editor
+
+        lateinit var securePrefs: SecurePreferences
+
+        var running = false
+
+        val RSA_PRIVATE_KEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAjNtzFmxMD6g+5pRzMh1P4V/3dIx88FPRalUZ+c2YnH9jI1k5NsM/fxrNpJVojRLkvmq2L9EIASacZ9pp3XS1f9JtCtyzVXIXUpyEJrTm5Ntm9vaw3YlBOKmyU0FmSEQ4KRCU77V3dxGzNdadsMaWz/ooccidNE28yISFqYT++tRD2lD4FzUfHSqZv+P6L89ZmILlQ71sGv5TDVzIAadqlLrvp6E639NTBFdjSNjXXwVEcSDFBmmqq6YDsvLYSMf9SGX8YsCDAo2MSlzaGV92CwiMUhuxZNIbcawPeA1raQq8KpQ0zNTchcw/GbXQSO1b6jx/2MiseJlkuICq9msglwIDAQAB"
+        val SALT = byteArrayOf(-81, 40, 92, 27, -18, -14, 98, 8, 91, 95, -5, 21, 26, -24, 54, -88, 62, 16, -42, -86)
     }
 
+    private lateinit var mLicenseCheckerCallback: LicenseCheckerCallback
+    private lateinit var mChecker: LicenseChecker
+
+    @SuppressLint("HardwareIds")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        mChecker = LicenseChecker(
+                this,
+                ServerManagedPolicy(this, AESObfuscator(SALT,
+                        packageName,
+                        Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID))),
+                        RSA_PRIVATE_KEY)
+        mLicenseCheckerCallback = MyLicenseCheckerCallback()
+        securePrefs = SecurePreferences(this, "subcore-secure", RSA_PRIVATE_KEY, true)
+
+        prefs = getSharedPreferences("subcore", Context.MODE_PRIVATE)
+        editor = prefs.edit()
+
+        /*if (securePrefs.getString("licensed") != "1")
+            doCheck()
+        */
 
         root = Root(this)
         runAsync = RunAsync()
 
         // setup get_current_objects async task
         val filter = IntentFilter(filter_get_current_options)
-        this.registerReceiver(runAsync, filter)
+        try {
+            registerReceiver(runAsync, filter)
+        } catch (e: Exception) {}
 
         toggleButton = findViewById(R.id.toggle)
         telegramButton = findViewById(R.id.telegram)
         gmailButton = findViewById(R.id.gmail)
         paypalButton = findViewById(R.id.paypal)
         lowMemSwitch = findViewById(R.id.low_mem)
+        applyOnBoot = findViewById(R.id.apply_on_boot)
 
-        prefs = getSharedPreferences("subcore", Context.MODE_PRIVATE)
-        editor = prefs.edit()
-
-        fetching_dialog = AlertDialog.Builder(this)
-                .setTitle("Loading")
-                .setMessage("Subcore is processing information. Please be patient.")
-                .setCancelable(false)
-
-        fetching_dialog_create = fetching_dialog.create()
         toggleButton.isEnabled = false
 
         runnableAsync(this, Runnable {
             root.checkRoot()
+            runnableAsync(this, Runnable {
+                arch = Utils.getArchitecture()
+                Utils.verifyCompat(this)
 
-            arch = getArchitecture()
-            verifyCompat()
+                bin = Utils.getBinName()
+                pathBin = Utils.getBinPath(this)
 
-            bin = getBinName()
-            pathBin = getBinPath()
-
-            runOnUiThread {
-                // set the UI elements
-                if (binRunning()) {
-                    running = true
-                    lowMemSwitch.isEnabled = false
-                    toggleButton.background = ContextCompat.getDrawable(MainActivity@this, R.drawable.rounded_drawable_green)
-                    toggleButton.text = resources.getText(R.string.on)
-                } else {
-                    running = false
-                    lowMemSwitch.isEnabled = true
-                    toggleButton.background = ContextCompat.getDrawable(MainActivity@this, R.drawable.rounded_drawable_red)
-                    toggleButton.text = resources.getText(R.string.off)
+                runOnUiThread {
+                    // set the UI elements
+                    if (Utils.binRunning()) {
+                        running = true
+                        lowMemSwitch.isEnabled = false
+                        toggleButton.background = ContextCompat.getDrawable(MainActivity@this, R.drawable.rounded_drawable_green)
+                        toggleButton.text = resources.getText(R.string.on)
+                    } else {
+                        running = false
+                        lowMemSwitch.isEnabled = true
+                        toggleButton.background = ContextCompat.getDrawable(MainActivity@this, R.drawable.rounded_drawable_red)
+                        toggleButton.text = resources.getText(R.string.off)
+                    }
                 }
-            }
 
-            writeBin()
-            toggleButton.isEnabled = true
-        }, true)
+                Utils.writeBin(this)
+                toggleButton.isEnabled = true
+            }, true)
+        }, false)
 
         toggleButton.setOnClickListener({
             val popAnim = AnimationUtils.loadAnimation(this, R.anim.pop)
@@ -111,11 +135,11 @@ class MainActivity : AppCompatActivity() {
 
             runnableAsync(this, Runnable {
                 if (running) {
-                    killBin()
+                    Utils.killBin(this)
                     toggleButton.text = resources.getText(R.string.off)
                     lowMemSwitch.isEnabled = true
                 } else {
-                    runBin()
+                    Utils.runBin(this)
                     toggleButton.text = resources.getText(R.string.on)
                     lowMemSwitch.isEnabled = false
                 }
@@ -144,6 +168,12 @@ class MainActivity : AppCompatActivity() {
             editor.apply()
         }
 
+        applyOnBoot.setOnClickListener {
+            val isChecked = applyOnBoot.isChecked
+            editor.putBoolean("apply_on_boot", isChecked)
+            editor.apply()
+        }
+
         if (prefs.getBoolean("first_run", true)) {
             if (Build.MANUFACTURER.toLowerCase().contains("samsung"))
                 editor.putBoolean("low_mem", true)
@@ -152,108 +182,65 @@ class MainActivity : AppCompatActivity() {
         }
 
         lowMemSwitch.isChecked = prefs.getBoolean("low_mem", false)
+        applyOnBoot.isChecked = prefs.getBoolean("apply_on_boot", false)
     }
 
     public override fun onDestroy() {
         super.onDestroy()
-        unregisterReceiver(runAsync)
-    }
-
-    private fun runBin() {
-        runnableAsync(this, Runnable {
-            var extraArgs = ""
-            if (prefs.getBoolean("low_mem", false))
-                extraArgs += "-m "
-            //val command = "[ `pgrep $bin` ] || setsid $pathBin $extra_args &"
-            val command = "[ `pgrep $bin` ] || $pathBin $extraArgs &"
-            root.run(command, true)
-        }, false)
-    }
-
-    private fun killBin() {
-        runnableAsync(this, Runnable {
-            root.run("killall $bin", true)
-        }, false)
-    }
-
-    private fun binRunning(): Boolean {
-        val status = root.run("[ `pgrep $bin` ] && echo 1", true)
-        return status.contains("1")
-    }
-
-    private fun writeBin() {
-        val ins =  when (arch) {
-            "arm" -> resources.openRawResource(R.raw.subcore_arm)
-            "arm64" -> resources.openRawResource(R.raw.subcore_arm64)
-            "x86" -> resources.openRawResource(R.raw.subcore_x86)
-            "x86_64" -> resources.openRawResource(R.raw.subcore_x86_64)
-            else -> resources.openRawResource(R.raw.subcore_arm)
-        }
-
-        val binName = getBinName()
-        val buffer = ByteArray(ins.available())
-        ins.read(buffer)
-        ins.close()
         try {
-            val fos = openFileOutput(binName, Context.MODE_PRIVATE)
-            fos.write(buffer)
-            fos.close()
-
-            val file = getFileStreamPath(binName)
-            file.setExecutable(true)
+            unregisterReceiver(runAsync)
         } catch (e: Exception) {}
     }
 
-    private fun getArchitecture(): String {
-        return when (getProp("ro.product.cpu.abi")) {
-            "armeabi" -> "arm"
-            "armeabi-v7a" -> "arm"
-            "x86" -> "x86"
-            "arm64-v8a" -> "arm64"
-            "x86_64" -> "x64"
-            "mips" -> "mips"
-            "mips64" -> "mips64"
-            else -> "other"
-        }
+
+    private fun doCheck() {
+        mChecker.checkAccess(mLicenseCheckerCallback)
     }
 
-    private fun verifyCompat() {
-        if (arch == "mips" || arch == "mips64" || arch == "other") {
-            AlertDialog.Builder(this)
-                .setTitle("Unsupported Architecture")
-                .setMessage("Your device is unsupported (MIPS).")
-                .setPositiveButton("Ok", { _, _ ->
-                    finish()
-                })
+    private fun unlicensedDialog() {
+        AlertDialog.Builder(MainActivity@this)
+                .setTitle("Unlicensed")
+                .setMessage("This app is potentially stolen, or Google is having an internal server issue.")
                 .setCancelable(false)
+                .setOnDismissListener({
+                    System.exit(1)
+                }).setPositiveButton("Ok", null)
                 .show()
+    }
+
+    private inner class MyLicenseCheckerCallback : LicenseCheckerCallback {
+
+        override fun allow(reason: Int) {
+            if (isFinishing) {
+                return
+            }
+            Log.i("License", "Accepted!")
+
+            if (securePrefs.getString("licensed") != "1")
+                securePrefs.put("licensed", "1")
         }
-    }
 
-    private fun getBinPath(): String {
-        val appFileDirectory = filesDir.path
-        val executableFilePath = "$appFileDirectory/"
-        return executableFilePath + bin
-    }
+        override fun dontAllow(reason: Int) {
+            if (isFinishing) {
+                return
+            }
+            Log.i("License", "Denied!")
+            Log.i("License", "Reason for denial: $reason")
 
-    private fun getBinName(): String {
-        return when (arch) {
-            "arm" -> "subcore_arm"
-            "arm64" -> "subcore_arm64"
-            "x86" -> "subcore_x86"
-            "x86_64" -> "subcore_x86_64"
-            else -> "subcore_arm"
+            if (securePrefs.getString("licensed") != "1")
+                securePrefs.put("licensed", "0")
+            unlicensedDialog()
         }
-    }
 
-    @SuppressLint("PrivateApi")
-    private fun getProp(prop: String): String? {
-        return try {
-            val clazz = Class.forName("android.os.SystemProperties")
-            val method = clazz.getDeclaredMethod("get", java.lang.String::class.java)
-            method.invoke(null, prop) as String
-        } catch (e: Exception) {
-            ""
+        override fun applicationError(reason: Int) {
+            Log.i("License", "Error: $reason")
+            if (isFinishing) {
+                return
+            }
+
+            if (securePrefs.getString("licensed") != "1")
+                securePrefs.put("licensed", "0")
+            unlicensedDialog()
         }
     }
 

@@ -1,8 +1,10 @@
 <resources>
     <string name="app_name">Subcore</string>
+    <string name="loading">LOADING</string>
     <string name="on">STOP</string>
     <string name="off">START</string>
     <string name="low_mem">Low Memory Device</string>
+    <string name="apply_on_boot">Start On Boot</string>
     <string name="help_text">
         Subcore is a daemon that systematically monitors various data input
         from your system to optimize your device for a unique workload.

@@ -35,6 +35,13 @@
                 android:layout_marginBottom="10dp"
                 android:id="@+id/low_mem"
                 android:textAlignment="center"/>
+            <CheckBox
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/apply_on_boot"
+                android:layout_marginBottom="10dp"
+                android:id="@+id/apply_on_boot"
+                android:textAlignment="center"/>
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -77,8 +84,8 @@
         android:layout_margin="20dp"
         android:id="@+id/toggle"
         android:padding="10dp"
-        android:background="@drawable/rounded_drawable_red"
+        android:background="@drawable/rounded_drawable_default"
         android:textSize="20sp"
-        android:text="@string/off"/>
+        android:text="@string/loading"/>
 
 </LinearLayout>

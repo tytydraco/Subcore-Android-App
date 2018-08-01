@@ -9,7 +9,7 @@ import java.io.InputStreamReader
 
 class Root(var context: Context) {
     fun checkRoot(): Boolean {
-        val rootGranted = run("ps", true)
+        val rootGranted = run("id", true)
         return if (rootGranted.contains("root")) {
             true
         } else {
@@ -25,7 +25,7 @@ class Root(var context: Context) {
         try {
             var command = cmd
             if (asRoot) {
-                command = "su -c ${command}"
+                command = "su -c $command"
             }
             val process = Runtime.getRuntime().exec(command)
             val reader = BufferedReader(
@@ -45,7 +45,6 @@ class Root(var context: Context) {
             return output.toString()
         } catch (e: Exception) {
             println(e.message)
-            //rootErrorDialog()
         }
         return ""
     }
@@ -54,8 +53,7 @@ class Root(var context: Context) {
         AlertDialog.Builder(context)
             .setTitle("Root Denied")
             .setMessage("Root is required to use this application. Please root your device.")
-            .setPositiveButton("Ok", DialogInterface.OnClickListener { _, _ ->
-                android.os.Process.killProcess(android.os.Process.myPid())
+            .setPositiveButton("Ok", { _, _ ->
                 System.exit(1)
             })
             .setCancelable(false)
