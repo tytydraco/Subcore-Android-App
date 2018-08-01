@@ -93,35 +93,33 @@ class MainActivity : AppCompatActivity() {
 
         runnableAsync(this, Runnable {
             root.checkRoot()
-            runnableAsync(this, Runnable {
-                arch = Utils.getArchitecture()
-                Utils.verifyCompat(this)
+            arch = Utils.getArchitecture()
+            Utils.verifyCompat(this)
 
-                bin = Utils.getBinName()
-                pathBin = Utils.getBinPath(this)
+            bin = Utils.getBinName()
+            pathBin = Utils.getBinPath(this)
 
-                runOnUiThread {
-                    // set the UI elements
-                    if (Utils.binRunning()) {
-                        running = true
-                        lowMemSwitch.isEnabled = false
-                        disablePowerAware.isEnabled = false
-                        toggleButton.background = ContextCompat.getDrawable(MainActivity@this, R.drawable.rounded_drawable_green)
-                        toggleButton.text = resources.getText(R.string.on)
-                    } else {
-                        running = false
-                        lowMemSwitch.isEnabled = true
-                        disablePowerAware.isEnabled = true
-                        toggleButton.background = ContextCompat.getDrawable(MainActivity@this, R.drawable.rounded_drawable_red)
-                        toggleButton.text = resources.getText(R.string.off)
-                    }
-                    applyOnBoot.isEnabled = true
+            runOnUiThread {
+                // set the UI elements
+                if (Utils.binRunning()) {
+                    running = true
+                    lowMemSwitch.isEnabled = false
+                    disablePowerAware.isEnabled = false
+                    toggleButton.background = ContextCompat.getDrawable(MainActivity@this, R.drawable.rounded_drawable_green)
+                    toggleButton.text = resources.getText(R.string.on)
+                } else {
+                    running = false
+                    lowMemSwitch.isEnabled = true
+                    disablePowerAware.isEnabled = true
+                    toggleButton.background = ContextCompat.getDrawable(MainActivity@this, R.drawable.rounded_drawable_red)
+                    toggleButton.text = resources.getText(R.string.off)
                 }
+                applyOnBoot.isEnabled = true
+            }
 
-                Utils.writeBin(this)
-                toggleButton.isEnabled = true
-            }, true)
-        }, false)
+            Utils.writeBin(this)
+            toggleButton.isEnabled = true
+        }, true)
 
         toggleButton.setOnClickListener({
             val popAnim = AnimationUtils.loadAnimation(this, R.anim.pop)

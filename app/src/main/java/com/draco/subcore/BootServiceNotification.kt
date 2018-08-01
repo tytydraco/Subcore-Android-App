@@ -52,7 +52,7 @@ class BootServiceNotification : Service() {
             return START_NOT_STICKY
         }
 
-        root = Root(applicationContext)
+        val newRoot = Root(applicationContext)
         runAsync = RunAsync()
 
         MainActivity.prefs = getSharedPreferences("subcore", Context.MODE_PRIVATE)
@@ -64,11 +64,11 @@ class BootServiceNotification : Service() {
         } catch (e: Exception) {}
 
         // manually check root
-        val rootGranted = root.run("id", true)
+        /*val rootGranted = root.run("id", true)
         if (!rootGranted.contains("root")) {
             dismissNotification()
             return START_NOT_STICKY
-        }
+        }*/
 
         MainActivity.arch = Utils.getArchitecture()
         Utils.verifyCompat(applicationContext)
@@ -79,16 +79,21 @@ class BootServiceNotification : Service() {
         Utils.writeBin(applicationContext)
 
         // Utils.runBin() is written out raw here
-        var extraArgs = ""
-        if (MainActivity.prefs.getBoolean("low_mem", false))
-            extraArgs += "-m "
-        if (MainActivity.prefs.getBoolean("disable_power_aware", false))
-            extraArgs += "-p "
-        val command = "[ `pgrep ${MainActivity.bin}` ] || ${MainActivity.pathBin} $extraArgs &"
-        root.run(command, true)
+        runnableAsync(applicationContext, Runnable {
+            var extraArgs = ""
+            if (MainActivity.prefs.getBoolean("low_mem", false))
+                extraArgs += "-m "
+            if (MainActivity.prefs.getBoolean("disable_power_aware", false))
+                extraArgs += "-p "
+            val command = "[ `pgrep ${MainActivity.bin}` ] || ${MainActivity.pathBin} $extraArgs &"
+            newRoot.run(command, true)
+
+            try {
+                this.unregisterReceiver(com.draco.subcore.runAsync)
+            } catch (e: Exception) {}
+        })
 
         dismissNotification()
-        this.unregisterReceiver(com.draco.subcore.runAsync)
 
         return START_NOT_STICKY
     }

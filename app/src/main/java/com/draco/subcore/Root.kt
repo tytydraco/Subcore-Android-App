@@ -50,13 +50,15 @@ class Root(var context: Context) {
     }
 
     private fun rootErrorDialog() {
-        AlertDialog.Builder(context)
-            .setTitle("Root Denied")
-            .setMessage("Root is required to use this application. Please root your device.")
-            .setPositiveButton("Ok", { _, _ ->
-                System.exit(1)
-            })
-            .setCancelable(false)
-            .show()
+        try {
+            AlertDialog.Builder(context)
+                    .setTitle("Root Denied")
+                    .setMessage("Root is required to use this application. Please root your device.")
+                    .setPositiveButton("Ok", { _, _ ->
+                        System.exit(1)
+                    })
+                    .setCancelable(false)
+                    .show()
+        } catch (e: Exception) {}
     }
 }
