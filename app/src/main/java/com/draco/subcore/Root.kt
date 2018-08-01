@@ -20,7 +20,7 @@ class Root(var context: Context) {
 
     fun run(cmd: String, asRoot: Boolean = false): String {
         // debug
-        Log.d("RUN_COMMAND", cmd)
+        //Log.d("RUN_COMMAND", cmd)
 
         try {
             var command = cmd
@@ -44,7 +44,7 @@ class Root(var context: Context) {
             process.waitFor()
             return output.toString()
         } catch (e: Exception) {
-            println(e.message)
+            //println(e.message)
         }
         return ""
     }

@@ -1,19 +1,14 @@
 package com.draco.subcore
 
-import android.app.Notification
-import android.app.Service
-import android.content.Intent
-import android.os.IBinder
-import android.util.Log
-import android.support.v4.app.NotificationCompat
-import android.app.NotificationManager
 import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.Service
 import android.content.Context
+import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
-import android.support.v4.app.NotificationManagerCompat
-import android.support.v4.content.ContextCompat
-import kotlin.concurrent.thread
+import android.os.IBinder
+import android.support.v4.app.NotificationCompat
 
 class BootServiceNotification : Service() {
 
@@ -87,6 +82,8 @@ class BootServiceNotification : Service() {
         var extraArgs = ""
         if (MainActivity.prefs.getBoolean("low_mem", false))
             extraArgs += "-m "
+        if (MainActivity.prefs.getBoolean("disable_power_aware", false))
+            extraArgs += "-p "
         val command = "[ `pgrep ${MainActivity.bin}` ] || ${MainActivity.pathBin} $extraArgs &"
         root.run(command, true)
 

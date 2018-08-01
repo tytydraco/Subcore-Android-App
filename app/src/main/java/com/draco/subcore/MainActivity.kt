@@ -13,7 +13,9 @@ import android.provider.Settings
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
-import android.util.Log
+import android.support.v7.widget.Toolbar
+import android.view.Menu
+import android.view.MenuItem
 import android.view.animation.AnimationUtils
 import android.widget.Button
 import android.widget.CheckBox
@@ -26,11 +28,9 @@ import com.google.android.vending.licensing.ServerManagedPolicy
 class MainActivity : AppCompatActivity() {
 
     private lateinit var toggleButton: Button
-    private lateinit var telegramButton: ImageButton
-    private lateinit var gmailButton: ImageButton
-    private lateinit var paypalButton: ImageButton
-    private lateinit var lowMemSwitch: CheckBox
     private lateinit var applyOnBoot: CheckBox
+    private lateinit var lowMemSwitch: CheckBox
+    private lateinit var disablePowerAware: CheckBox
 
     companion object {
         lateinit var arch: String
@@ -55,6 +55,9 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        val toolbar = findViewById<Toolbar>(R.id.toolbar)
+        setSupportActionBar(toolbar)
 
         mChecker = LicenseChecker(
                 this,
@@ -82,11 +85,9 @@ class MainActivity : AppCompatActivity() {
         } catch (e: Exception) {}
 
         toggleButton = findViewById(R.id.toggle)
-        telegramButton = findViewById(R.id.telegram)
-        gmailButton = findViewById(R.id.gmail)
-        paypalButton = findViewById(R.id.paypal)
-        lowMemSwitch = findViewById(R.id.low_mem)
         applyOnBoot = findViewById(R.id.apply_on_boot)
+        lowMemSwitch = findViewById(R.id.low_mem)
+        disablePowerAware = findViewById(R.id.disable_power_aware)
 
         toggleButton.isEnabled = false
 
@@ -104,11 +105,13 @@ class MainActivity : AppCompatActivity() {
                     if (Utils.binRunning()) {
                         running = true
                         lowMemSwitch.isEnabled = false
+                        disablePowerAware.isEnabled = false
                         toggleButton.background = ContextCompat.getDrawable(MainActivity@this, R.drawable.rounded_drawable_green)
                         toggleButton.text = resources.getText(R.string.on)
                     } else {
                         running = false
                         lowMemSwitch.isEnabled = true
+                        disablePowerAware.isEnabled = true
                         toggleButton.background = ContextCompat.getDrawable(MainActivity@this, R.drawable.rounded_drawable_red)
                         toggleButton.text = resources.getText(R.string.off)
                     }
@@ -138,28 +141,21 @@ class MainActivity : AppCompatActivity() {
                     Utils.killBin(this)
                     toggleButton.text = resources.getText(R.string.off)
                     lowMemSwitch.isEnabled = true
+                    disablePowerAware.isEnabled = true
                 } else {
                     Utils.runBin(this)
                     toggleButton.text = resources.getText(R.string.on)
                     lowMemSwitch.isEnabled = false
+                    disablePowerAware.isEnabled = false
                 }
                 running = !running
             }, true)
         })
 
-        telegramButton.setOnClickListener {
-            val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://t.me/tytydraco"))
-            startActivity(browserIntent)
-        }
-
-        gmailButton.setOnClickListener {
-            val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("mailto:tylernij@gmail.com"))
-            startActivity(browserIntent)
-        }
-
-        paypalButton.setOnClickListener {
-            val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://paypal.me/TylerNijmeh"))
-            startActivity(browserIntent)
+        applyOnBoot.setOnClickListener {
+            val isChecked = applyOnBoot.isChecked
+            editor.putBoolean("apply_on_boot", isChecked)
+            editor.apply()
         }
 
         lowMemSwitch.setOnClickListener {
@@ -168,9 +164,9 @@ class MainActivity : AppCompatActivity() {
             editor.apply()
         }
 
-        applyOnBoot.setOnClickListener {
-            val isChecked = applyOnBoot.isChecked
-            editor.putBoolean("apply_on_boot", isChecked)
+        disablePowerAware.setOnClickListener {
+            val isChecked = disablePowerAware.isChecked
+            editor.putBoolean("disable_power_aware", isChecked)
             editor.apply()
         }
 
@@ -181,8 +177,9 @@ class MainActivity : AppCompatActivity() {
             editor.apply()
         }
 
-        lowMemSwitch.isChecked = prefs.getBoolean("low_mem", false)
         applyOnBoot.isChecked = prefs.getBoolean("apply_on_boot", false)
+        lowMemSwitch.isChecked = prefs.getBoolean("low_mem", false)
+        disablePowerAware.isChecked = prefs.getBoolean("disable_power_aware", false)
     }
 
     public override fun onDestroy() {
@@ -192,6 +189,32 @@ class MainActivity : AppCompatActivity() {
         } catch (e: Exception) {}
     }
 
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        menuInflater.inflate(R.menu.menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        val id = item.itemId
+        return when (id) {
+            R.id.donate -> {
+                val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://paypal.me/TylerNijmeh"))
+                startActivity(browserIntent)
+                true
+            }
+            R.id.contact -> {
+                val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("mailto:tylernij@gmail.com"))
+                startActivity(browserIntent)
+                true
+            }
+            R.id.kill_all -> {
+                Utils.killBin(MainActivity@this)
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
 
     private fun doCheck() {
         mChecker.checkAccess(mLicenseCheckerCallback)
@@ -214,7 +237,7 @@ class MainActivity : AppCompatActivity() {
             if (isFinishing) {
                 return
             }
-            Log.i("License", "Accepted!")
+            //Log.i("License", "Accepted!")
 
             if (securePrefs.getString("licensed") != "1")
                 securePrefs.put("licensed", "1")
@@ -224,8 +247,8 @@ class MainActivity : AppCompatActivity() {
             if (isFinishing) {
                 return
             }
-            Log.i("License", "Denied!")
-            Log.i("License", "Reason for denial: $reason")
+            //Log.i("License", "Denied!")
+            //Log.i("License", "Reason for denial: $reason")
 
             if (securePrefs.getString("licensed") != "1")
                 securePrefs.put("licensed", "0")
@@ -233,7 +256,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         override fun applicationError(reason: Int) {
-            Log.i("License", "Error: $reason")
+            //Log.i("License", "Error: $reason")
             if (isFinishing) {
                 return
             }

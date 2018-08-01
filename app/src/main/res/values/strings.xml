@@ -3,23 +3,31 @@
     <string name="loading">LOADING</string>
     <string name="on">STOP</string>
     <string name="off">START</string>
-    <string name="low_mem">Low Memory Device</string>
     <string name="apply_on_boot">Start On Boot</string>
-    <string name="help_text">
-        Subcore is a daemon that systematically monitors various data input
-        from your system to optimize your device for a unique workload.
-        The goal is to conserve power that would rather be wasted on
-        basic tasks (which require much less power than they are provided).
-        This algorithm provides outstanding battery life at little cost. The
-        device will feel smooth as usual.
-        \n\nSubcore optimizes multiple aspects of the system, including:
+    <string name="low_mem">Low Memory Device</string>
+    <string name="disable_power_aware">Disable Power Aware</string>
+    <string name="donate">Donate</string>
+    <string name="contact">Contact</string>
+    <string name="kill_all">Kill All</string>
+    <string name="help_text">Subcore is a daemon that systematically monitors various data
+        from your system to optimize your device for each unique workload.
+        The goal is to conserve power that would otherwise be wasted on
+        basic tasks that don\'t require the extra power (such as social media).
+        This algorithm provides outstanding battery life at a marginal cost.
+        \n\nSubcore monitors and optimizes multiple aspects of the system, including:
         \n- sysctl (kernel) tweaks
         \n- block (storage) tweaks
         \n- mm (memory) tweaks
         \n- CPU tweaks
         \n- GPU tweaks
         \n- scheduler tweaks
+        \n- screen state
+        \n- battery state and capacity
         \n- and much more
+        \n\nWhat\'s more is that Subcore will generate profiles that are unique to the device
+        based on its hardware specifications, including RAM size, battery life, max CPU frequency,
+        max GPU frequency, CPU governor, and much more. This ensures each device is optimized to its
+        full potential.
         \n\nThank you for using Subcore and supporting me and my hobby. Contact me
         for criticism, compliments, concerns, or anything else!
         </string>

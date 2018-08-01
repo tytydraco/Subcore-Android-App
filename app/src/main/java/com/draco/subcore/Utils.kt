@@ -11,6 +11,8 @@ class Utils {
                 var extraArgs = ""
                 if (MainActivity.prefs.getBoolean("low_mem", false))
                     extraArgs += "-m "
+                if (MainActivity.prefs.getBoolean("disable_power_aware", false))
+                    extraArgs += "-p "
                 val command = "[ `pgrep ${MainActivity.bin}` ] || ${MainActivity.pathBin} $extraArgs &"
                 root.run(command, true)
             }, false)
