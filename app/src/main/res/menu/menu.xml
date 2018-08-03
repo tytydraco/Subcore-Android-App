@@ -7,6 +7,4 @@
         android:title="@string/donate"/>
     <item android:id="@+id/contact"
         android:title="@string/contact"/>
-    <item android:id="@+id/kill_all"
-        android:title="@string/kill_all" />
 </menu>

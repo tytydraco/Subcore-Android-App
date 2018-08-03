@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <CheckBoxPreference
+        android:title="Start On Boot"
+        android:defaultValue="false"
+        android:summary="Initialize Subcore automatically after each boot."
+        android:key="apply_on_boot"
+        android:enabled="false"/>
+    <CheckBoxPreference
+        android:title="Low Memory Device"
+        android:defaultValue="false"
+        android:summary="Enable this for skinned devices (Samsung, LG, etc) to avoid running out of memory."
+        android:key="low_mem"
+        android:enabled="false"/>
+    <CheckBoxPreference
+        android:title="Disable Power Aware"
+        android:defaultValue="false"
+        android:summary="Enable this to bypass battery/charging status when running the Subcore algorithm."
+        android:key="disable_power_aware"
+        android:enabled="false"/>
+    <Preference
+        android:title="Info"
+        android:summary="Learn about how the Subcore algorithm works in detail."
+        android:key="info"
+        android:enabled="false"/>
+    <Preference
+        android:title="Kill All"
+        android:summary="Press this to forcefully kill all instances of the Subcore daemon."
+        android:key="kill_all"
+        android:enabled="false"/>
+</PreferenceScreen>

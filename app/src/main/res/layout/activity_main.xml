@@ -19,55 +19,15 @@
             android:background="?attr/colorPrimary" />
     </android.support.design.widget.AppBarLayout>
 
-    <CheckBox
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/apply_on_boot"
-        android:layout_marginStart="10dp"
-        android:layout_marginBottom="3dp"
-        android:layout_marginTop="3dp"
-        android:id="@+id/apply_on_boot"
-        android:textSize="15sp"
-        android:enabled="false"/>
-    <CheckBox
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/low_mem"
-        android:layout_marginStart="10dp"
-        android:layout_marginBottom="3dp"
-        android:id="@+id/low_mem"
-        android:textSize="15sp"
-        android:enabled="false"/>
-    <CheckBox
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/disable_power_aware"
-        android:layout_marginStart="10dp"
-        android:layout_marginBottom="3dp"
-        android:id="@+id/disable_power_aware"
-        android:textSize="15sp"
-        android:enabled="false"/>
-
-    <ScrollView
+    <LinearLayout
+        android:id="@+id/optContainer"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1">
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="center">
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/help"
-                android:paddingStart="20dp"
-                android:paddingEnd="20dp"
-                android:paddingBottom="10dp"
-                android:textSize="20sp"
-                android:text="@string/help_text"/>
-        </LinearLayout>
-    </ScrollView>
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="top">
+
+    </LinearLayout>
 
     <Button
         android:layout_width="match_parent"

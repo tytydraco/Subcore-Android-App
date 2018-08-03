@@ -9,6 +9,9 @@ import android.graphics.drawable.TransitionDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.preference.CheckBoxPreference
+import android.preference.Preference
+import android.preference.PreferenceManager
 import android.provider.Settings
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
@@ -19,18 +22,14 @@ import android.view.MenuItem
 import android.view.animation.AnimationUtils
 import android.widget.Button
 import android.widget.CheckBox
-import android.widget.ImageButton
 import com.google.android.vending.licensing.AESObfuscator
 import com.google.android.vending.licensing.LicenseChecker
 import com.google.android.vending.licensing.LicenseCheckerCallback
 import com.google.android.vending.licensing.ServerManagedPolicy
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceChangeListener {
 
     private lateinit var toggleButton: Button
-    private lateinit var applyOnBoot: CheckBox
-    private lateinit var lowMemSwitch: CheckBox
-    private lateinit var disablePowerAware: CheckBox
 
     companion object {
         lateinit var arch: String
@@ -43,6 +42,8 @@ class MainActivity : AppCompatActivity() {
         lateinit var securePrefs: SecurePreferences
 
         var running = false
+
+        lateinit var optFrag: OptionFragment
 
         val RSA_PRIVATE_KEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAjNtzFmxMD6g+5pRzMh1P4V/3dIx88FPRalUZ+c2YnH9jI1k5NsM/fxrNpJVojRLkvmq2L9EIASacZ9pp3XS1f9JtCtyzVXIXUpyEJrTm5Ntm9vaw3YlBOKmyU0FmSEQ4KRCU77V3dxGzNdadsMaWz/ooccidNE28yISFqYT++tRD2lD4FzUfHSqZv+P6L89ZmILlQ71sGv5TDVzIAadqlLrvp6E639NTBFdjSNjXXwVEcSDFBmmqq6YDsvLYSMf9SGX8YsCDAo2MSlzaGV92CwiMUhuxZNIbcawPeA1raQq8KpQ0zNTchcw/GbXQSO1b6jx/2MiseJlkuICq9msglwIDAQAB"
         val SALT = byteArrayOf(-81, 40, 92, 27, -18, -14, 98, 8, 91, 95, -5, 21, 26, -24, 54, -88, 62, 16, -42, -86)
@@ -58,6 +59,66 @@ class MainActivity : AppCompatActivity() {
 
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
+
+        val opts = PreferenceManager.getDefaultSharedPreferences(baseContext)
+        opts.registerOnSharedPreferenceChangeListener(this)
+
+        // could end up with overlapping fragments
+        if (savedInstanceState == null) {
+            optFrag = OptionFragment()
+            optFrag.retainInstance = true
+
+            fragmentManager
+                    .beginTransaction()
+                    .add(R.id.optContainer, optFrag)
+                    .commit()
+        }
+
+        optFrag.applyOnBoot = {
+            val isChecked = (optFrag.preferenceManager.findPreference("apply_on_boot") as CheckBoxPreference).isChecked
+            editor.putBoolean("low_mem", isChecked)
+            editor.apply()
+        }
+
+        optFrag.lowMem = {
+            val isChecked = (optFrag.preferenceManager.findPreference("low_mem") as CheckBoxPreference).isChecked
+            editor.putBoolean("low_mem", isChecked)
+            editor.apply()
+        }
+
+        optFrag.disablePowerAware = {
+            val isChecked = (optFrag.preferenceManager.findPreference("disable_power_aware") as CheckBoxPreference).isChecked
+            editor.putBoolean("disable_power_aware", isChecked)
+            editor.apply()
+        }
+
+        optFrag.info = {
+            AlertDialog.Builder(this, R.style.AlertDialogStyle)
+                    .setTitle("Info")
+                    .setView(R.layout.activity_info)
+                    .setPositiveButton("Ok", null)
+                    .show()
+        }
+
+        optFrag.killAll = {
+            if (running) {
+                val popAnim = AnimationUtils.loadAnimation(this, R.anim.pop)
+                toggleButton.startAnimation(popAnim)
+
+                toggleButton.background = ContextCompat.getDrawable(this, R.drawable.transition_enable_disable)
+                val transition = toggleButton.background as TransitionDrawable
+
+                transition.startTransition(300)
+            }
+
+            runnableAsync(this, Runnable {
+                Utils.killBin(this)
+                toggleButton.text = resources.getText(R.string.off)
+                (MainActivity.optFrag.preferenceManager.findPreference("low_mem") as CheckBoxPreference).isEnabled = true
+                (MainActivity.optFrag.preferenceManager.findPreference("disable_power_aware") as CheckBoxPreference).isEnabled = true
+                running = false
+            }, true)
+        }
 
         mChecker = LicenseChecker(
                 this,
@@ -85,10 +146,6 @@ class MainActivity : AppCompatActivity() {
         } catch (e: Exception) {}
 
         toggleButton = findViewById(R.id.toggle)
-        applyOnBoot = findViewById(R.id.apply_on_boot)
-        lowMemSwitch = findViewById(R.id.low_mem)
-        disablePowerAware = findViewById(R.id.disable_power_aware)
-
         toggleButton.isEnabled = false
 
         runnableAsync(this, Runnable {
@@ -103,18 +160,20 @@ class MainActivity : AppCompatActivity() {
                 // set the UI elements
                 if (Utils.binRunning()) {
                     running = true
-                    lowMemSwitch.isEnabled = false
-                    disablePowerAware.isEnabled = false
+                    (optFrag.preferenceManager.findPreference("low_mem") as CheckBoxPreference).isEnabled = false
+                    (optFrag.preferenceManager.findPreference("disable_power_aware") as CheckBoxPreference).isEnabled = false
                     toggleButton.background = ContextCompat.getDrawable(MainActivity@this, R.drawable.rounded_drawable_green)
                     toggleButton.text = resources.getText(R.string.on)
                 } else {
                     running = false
-                    lowMemSwitch.isEnabled = true
-                    disablePowerAware.isEnabled = true
+                    (optFrag.preferenceManager.findPreference("low_mem") as CheckBoxPreference).isEnabled = true
+                    (optFrag.preferenceManager.findPreference("disable_power_aware") as CheckBoxPreference).isEnabled = true
                     toggleButton.background = ContextCompat.getDrawable(MainActivity@this, R.drawable.rounded_drawable_red)
                     toggleButton.text = resources.getText(R.string.off)
                 }
-                applyOnBoot.isEnabled = true
+                (optFrag.preferenceManager.findPreference("apply_on_boot") as CheckBoxPreference).isEnabled = true
+                (optFrag.preferenceManager.findPreference("info") as Preference).isEnabled = true
+                (optFrag.preferenceManager.findPreference("kill_all") as Preference).isEnabled = true
             }
 
             Utils.writeBin(this)
@@ -139,35 +198,17 @@ class MainActivity : AppCompatActivity() {
                 if (running) {
                     Utils.killBin(this)
                     toggleButton.text = resources.getText(R.string.off)
-                    lowMemSwitch.isEnabled = true
-                    disablePowerAware.isEnabled = true
+                    (optFrag.preferenceManager.findPreference("low_mem") as CheckBoxPreference).isEnabled = true
+                    (optFrag.preferenceManager.findPreference("disable_power_aware") as CheckBoxPreference).isEnabled = true
                 } else {
                     Utils.runBin(this)
                     toggleButton.text = resources.getText(R.string.on)
-                    lowMemSwitch.isEnabled = false
-                    disablePowerAware.isEnabled = false
+                    (optFrag.preferenceManager.findPreference("low_mem") as CheckBoxPreference).isEnabled = false
+                    (optFrag.preferenceManager.findPreference("disable_power_aware") as CheckBoxPreference).isEnabled = false
                 }
                 running = !running
             }, true)
         })
-
-        applyOnBoot.setOnClickListener {
-            val isChecked = applyOnBoot.isChecked
-            editor.putBoolean("apply_on_boot", isChecked)
-            editor.apply()
-        }
-
-        lowMemSwitch.setOnClickListener {
-            val isChecked = lowMemSwitch.isChecked
-            editor.putBoolean("low_mem", isChecked)
-            editor.apply()
-        }
-
-        disablePowerAware.setOnClickListener {
-            val isChecked = disablePowerAware.isChecked
-            editor.putBoolean("disable_power_aware", isChecked)
-            editor.apply()
-        }
 
         if (prefs.getBoolean("first_run", true)) {
             if (Build.MANUFACTURER.toLowerCase().contains("samsung"))
@@ -175,10 +216,6 @@ class MainActivity : AppCompatActivity() {
             editor.putBoolean("first_run", false)
             editor.apply()
         }
-
-        applyOnBoot.isChecked = prefs.getBoolean("apply_on_boot", false)
-        lowMemSwitch.isChecked = prefs.getBoolean("low_mem", false)
-        disablePowerAware.isChecked = prefs.getBoolean("disable_power_aware", false)
     }
 
     public override fun onDestroy() {
@@ -186,6 +223,10 @@ class MainActivity : AppCompatActivity() {
         try {
             unregisterReceiver(runAsync)
         } catch (e: Exception) {}
+    }
+
+    override fun onSharedPreferenceChanged(pref: SharedPreferences?, key: String?) {
+
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -205,10 +246,6 @@ class MainActivity : AppCompatActivity() {
             R.id.contact -> {
                 val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("mailto:tylernij@gmail.com"))
                 startActivity(browserIntent)
-                true
-            }
-            R.id.kill_all -> {
-                Utils.killBin(MainActivity@this)
                 true
             }
             else -> super.onOptionsItemSelected(item)

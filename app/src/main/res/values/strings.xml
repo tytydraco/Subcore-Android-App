@@ -9,26 +9,75 @@
     <string name="donate">Donate</string>
     <string name="contact">Contact</string>
     <string name="kill_all">Kill All</string>
-    <string name="help_text">Subcore is a daemon that systematically monitors various data
-        from your system to optimize your device for each unique workload.
-        The goal is to conserve power that would otherwise be wasted on
-        basic tasks that don\'t require the extra power (such as social media).
-        This algorithm provides outstanding battery life at a marginal cost.
-        \n\nSubcore monitors and optimizes multiple aspects of the system, including:
-        \n- sysctl (kernel) tweaks
-        \n- block (storage) tweaks
-        \n- mm (memory) tweaks
-        \n- CPU tweaks
-        \n- GPU tweaks
-        \n- scheduler tweaks
-        \n- screen state
-        \n- battery state and capacity
-        \n- and much more
-        \n\nWhat\'s more is that Subcore will generate profiles that are unique to the device
-        based on its hardware specifications, including RAM size, battery life, max CPU frequency,
-        max GPU frequency, CPU governor, and much more. This ensures each device is optimized to its
-        full potential.
-        \n\nThank you for using Subcore and supporting me and my hobby. Contact me
-        for criticism, compliments, concerns, or anything else!
-        </string>
+    <string name="help_text">
+    —What Is It—
+    \nSubcore is an root daemon that utilizes various sensors in the device to systematically apply different usage profiles. The goal is to achieve a balance based on the user\'s workload, rather than relying on the CPU governor to make bias assumptions about the current workload.
+\n
+    \n—How Does It Work—
+    \nSubcore reads and writes to system files on the device to determine which profile to place the device into. These interfaces include:
+    \n• Active CPU load
+    \n• Available CPU cores
+    \n• Available CPU governors
+    \n• Available CPU frequencies
+    \n• Available GPU load
+    \n• Available GPU frequencies
+    \n• Current battery capacity
+    \n• Battery state (charging / discharging)
+    \n• Screen state
+    \n\t◦ State Notifier (primary choice)
+    \n\t◦ Power Suspend (secondary choice)
+    \n\t◦ Framebuffer interface (tertiary choice)
+    \n• Available device memory
+    \n• Max device memory
+    \n• Available IO schedulers
+    \n• Block readahead
+    \n• Block swappiness
+    \n• Block cache pressure
+    \n• Block dirty rations
+    \n• Random entropy
+    \n• Block overcommit
+    \n• Block page cluster
+    \n• Block dirty centisecs
+    \n• Block LMK
+    \n• Block laptop mode
+    \n• Block KSM
+    \n• Uniquely Generated Interactive Tunables
+\n
+    \n—User Prediction Algorithm—
+    \nWithout some form of user prediction, a game could begin to lag for a moment during a loading scene, where the load requirement dips. To counteract this, Subcore implements a user prediction algorithm that attempts to maintain fluidity in heavy applications, even during moments of low load. It works by determining repetitive load averages, and scanning less often when the load is consistent. This results in far less lag spikes when playing intensive games.
+\n
+    \n—Power Aware Algorithm—
+    \nSince Subcore is a low-level (yet userspace) tool, it has direct access to battery statistics. When charging (and screen on), Subcore will boost your performance to the highest performing profile to ensure the user experiences UI/UX conformity, disregarding the energy limitation. Additionally, when Subcore detects the device is at 15% battery or less, it will half the loadavg, which means it requires twice as much CPU load to enter the next profile. Likewise, at 5% battery or less, Subcore locks the device into the lowest profile, which is optimized for deep sleep or idle, sacrificing a chunk of performance to battery. This setting can be disabled by toggling "Disable Power Aware" in the Subcore GUI app.
+\n
+    \n—RUPG - Realtime Unique Profile Generation—
+    \nSubcore implements a new concept that I call RUPG. What makes Subcore special is the fact that it is compatible with essentially all devices. At runtime, Subcore initially gathers heaps of data to generate numerous device-specific profiles based on various factors. These generated profiles are heavily optimized for each device, so that each user achieves the most efficient software experience for the available hardware/software provided. These profiles are then saved in memory and are marked for deletion when Subcore exits. Some examples where RUPG is utilized is in the generation of device specific LMK offsets (minfree). Each device has a different RAM size, so Subcore must manually calculate the optimum LMK minfree sizes for each offset vector (VERY_LIGHT —> VERY_AGGRESSIVE). Subcore also utilizes RUPG in the production of the interactive governor tunables. Each device has a different SOC CPU frequency table, which must be accounted for. These profiles are generated automatically by the binary, so the user doesn\'t need to tune anything themselves.
+\n
+    \n—Race To Idle—
+    \nResearch proves that when completing a task, less resources are eaten when boosting to a slightly higher frequency for a short time, rather than a low frequency for longer. Subcore takes full advantage of this theory and applies special interactive tunables for each profile. Why interactive? Interactive is on just about every android device\'s kernel, so it\'s portable. Interactive is also highly tunable. You can achieve similar behavior of other governors just by tweaking interactive. Back to Race To Idle, each Subcore profile has a different goal to achieve. The UI/UX is the main profile that takes full advantage of RTI. This profile tunes interactive to stay at minimum frequencies until a small workload is requested. It then jumps up a frequency level to complete the task faster, then it instantly shoots back to minimum frequency if all other tasks are completed. If a heavy task comes up, but not quite heavy enough to trigger a profile change, the UI/UX profile will handle it by jumping another 1-2 frequency levels. Finishing the work requested, the loadavg will quickly shoot down and interactive will return to idle, saving battery yet increasing performance; it sounds impossible, but in practice, it works better than expected.
+\n
+    \n—Performance == Battery—
+    \nIt sounds impossible. How can an app save power, but also make my device perform better? Here\'s why it works. Think about battery and performance as independent spectrums. Just because you have one doesn\'t mean you can\'t have the other. By working efficiently, Subcore can actually improve performance on some devices. This is because Subcore doesn\'t just tune your device for battery, it also applies VM tweaks, MM tweaks, Block tweaks, and much more. During my testing phase, many of my testers were telling me how Subcore strangely caused some tasks to perform better than usual. This included UI/UX smoothness, app start times, Camera HDR rendering, file IO (such as zipping a large file), and some other tasks. I realized that the tweaks that Subcore applies improve battery by improving performance in areas that don\'t affect battery as much. For example, something as basic as IO readahead will cause a marginal impact on battery, but the Block performance benefit that comes with a higher readahead can cause IO tasks to finish much faster. Applying the concept of Race To Idle, the disk performance benefit helps the device finish its current task faster, allowing the CPUs to reach deep sleep sooner, and in turn, providing better battery.
+\n
+    \n—Hyper Optimizing—
+    \nSubcore is written in native C++. In fact, the Android app for Subcore just forks the included binary based on the device architecture. Since Subcore is written in C++, it is light, fast, and pretty tiny. It is also entirely independent from Java code entirely. Once it\'s started, the Subcore app can be killed fully (even force quit), and the daemon will persist, since it is the parent of its own process. Using `top`, you can see Subcore isn\'t even on the list. Every single line of the C++ code is written to utilize the least amount of memory, and run as efficiently as possible. It utilizes C++11 inlines, uint*_t, -Ofast, —strip-all, custom built NDK clang toolchains from source, and far more optimization. Subcore includes C++STL in the binary as well, so it is portable and is contained all in one binary. Subcore is also compiled in ARM, ARM64, x86, x86_64. MIPS is not supported at this time.
+\n
+    \n—Automatic Backup/Restore Algorithm—
+    \nSince Subcore writes to a large portion of your sysctl, many of your kernel manager tweaks would be written over until they are reapplied on the next boot. Luckily, I spent the extra time to implement an automatic backup and restore algorithm to save the device\'s current settings on the start of Subcore. On sending a SIGINT or SIGTERM to Subcore, it will restore the user settings before exiting. This way, you don\'t need to reboot each time you stop Subcore. NOTE: If you toggle Start On Boot to Subcore, there is a high probability that it will start before your kernel manager\'s apply on boot will. This means that Subcore won\'t backup the proper data, so when you stop Subcore, your kernel manager tweaks won\'t be applied. To solve this, either reduce the timeout for starting on boot for your kernel manager, or start Subcore manually after each boot.
+\n
+    \n—Results—
+    \nWhen you start using Subcore, it\'ll feel too good to be true. But stats don\'t lie. I will provide quotes from my testers, along with screenshots of my testers and my battery life improvement. I urge everyone that tries Subcore to post your results, along with the device model you are using. If you have any questions about how Subcore works, or if you have any questions at all, please contact me. I\'d be more than happy to address your concerns.
+\n
+    \n—Testers—
+    \nI\'d like to personally thank all of my testers for sacrificing their phones to my code. Each and every one of them assisted in the stability of the program itself.
+    \n@kdrag0n
+    \n@EFranz
+    \n@ASHLEY117
+    \n@Perryfreem
+    \n@mountaser_halak
+\n
+    \n—Extra Notes—
+    \nFor Subcore to work properly, please ensure the following things are proper:
+    \n• Disable all hotplugs. Subcore handles better with them off.
+    \n• Make sure Subcore is always granted root.
+     </string>
 </resources>
