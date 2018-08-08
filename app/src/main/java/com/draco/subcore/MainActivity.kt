@@ -21,11 +21,11 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.animation.AnimationUtils
 import android.widget.Button
-import android.widget.CheckBox
 import com.google.android.vending.licensing.AESObfuscator
 import com.google.android.vending.licensing.LicenseChecker
 import com.google.android.vending.licensing.LicenseCheckerCallback
 import com.google.android.vending.licensing.ServerManagedPolicy
+import com.topjohnwu.superuser.Shell
 
 class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceChangeListener {
 
@@ -74,6 +74,10 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
                     .commit()
         }
 
+        // You can configure Shell here
+        Shell.Config.setFlags(Shell.FLAG_REDIRECT_STDERR)
+        Shell.Config.verboseLogging(BuildConfig.DEBUG)
+
         optFrag.applyOnBoot = {
             val isChecked = (optFrag.preferenceManager.findPreference("apply_on_boot") as CheckBoxPreference).isChecked
             editor.putBoolean("low_mem", isChecked)
@@ -93,11 +97,7 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
         }
 
         optFrag.info = {
-            AlertDialog.Builder(this, R.style.AlertDialogStyle)
-                    .setTitle("Info")
-                    .setView(R.layout.activity_info)
-                    .setPositiveButton("Ok", null)
-                    .show()
+            startActivity(Intent(MainActivity@this, InfoActivity::class.java))
         }
 
         optFrag.killAll = {
@@ -136,7 +136,6 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
             doCheck()
         */
 
-        root = Root(this)
         runAsync = RunAsync()
 
         // setup get_current_objects async task
@@ -149,7 +148,19 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
         toggleButton.isEnabled = false
 
         runnableAsync(this, Runnable {
-            root.checkRoot()
+
+            if (!Shell.rootAccess()) {
+                AlertDialog.Builder(MainActivity@ this)
+                        .setTitle("Root Denied")
+                        .setMessage("Root is required to use this application. Please root your device.")
+                        .setPositiveButton("Ok") { _, _ ->
+                            System.exit(1)
+                        }
+                        .setCancelable(false)
+                        .show()
+                return@Runnable
+            }
+
             arch = Utils.getArchitecture()
             Utils.verifyCompat(this)
 
@@ -180,7 +191,7 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
             toggleButton.isEnabled = true
         }, true)
 
-        toggleButton.setOnClickListener({
+        toggleButton.setOnClickListener {
             val popAnim = AnimationUtils.loadAnimation(this, R.anim.pop)
             toggleButton.startAnimation(popAnim)
 
@@ -208,7 +219,7 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
                 }
                 running = !running
             }, true)
-        })
+        }
 
         if (prefs.getBoolean("first_run", true)) {
             if (Build.MANUFACTURER.toLowerCase().contains("samsung"))

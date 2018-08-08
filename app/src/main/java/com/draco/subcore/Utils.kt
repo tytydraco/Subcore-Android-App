@@ -3,6 +3,7 @@ package com.draco.subcore
 import android.annotation.SuppressLint
 import android.content.Context
 import android.support.v7.app.AlertDialog
+import com.topjohnwu.superuser.Shell
 
 class Utils {
     companion object {
@@ -14,19 +15,18 @@ class Utils {
                 if (MainActivity.prefs.getBoolean("disable_power_aware", false))
                     extraArgs += "-p "
                 val command = "[ `pgrep ${MainActivity.bin}` ] || ${MainActivity.pathBin} $extraArgs &"
-                root.run(command, true)
+                Shell.su(command).exec()
             }, false)
         }
 
         fun killBin(context: Context) {
             runnableAsync(context, Runnable {
-                root.run("killall ${MainActivity.bin}", true)
+                Shell.su("killall ${MainActivity.bin}").exec()
             }, false)
         }
 
         fun binRunning(): Boolean {
-            val status = root.run("[ `pgrep ${MainActivity.bin}` ] && echo 1", true)
-            return status.contains("1")
+            return Shell.su("[ `pgrep ${MainActivity.bin}` ] && echo 1").exec().isSuccess
         }
 
         fun writeBin(context: Context) {

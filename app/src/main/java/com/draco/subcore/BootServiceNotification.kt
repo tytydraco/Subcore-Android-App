@@ -5,16 +5,17 @@ import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.os.Build
 import android.os.IBinder
 import android.support.v4.app.NotificationCompat
+import com.topjohnwu.superuser.Shell
 
 class BootServiceNotification : Service() {
 
     val CHANNEL_ID = "subcore_boot_notification"
     lateinit var channel: NotificationChannel
     lateinit var notificationManager: NotificationManager
+    lateinit var conatiner: Shell.Container
 
     override fun onBind(intent: Intent?): IBinder? {
         return null
@@ -45,56 +46,30 @@ class BootServiceNotification : Service() {
     }
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
+        conatiner = Shell.Config.newContainer()
         displayNotification()
 
-        if (MainActivity.running) {
+        if (MainActivity.running || !Shell.rootAccess()) {
             dismissNotification()
             return START_NOT_STICKY
         }
 
-        val newRoot = Root(applicationContext)
-        runAsync = RunAsync()
-
         MainActivity.prefs = getSharedPreferences("subcore", Context.MODE_PRIVATE)
-
-        // setup get_current_objects async task
-        val filter = IntentFilter(filter_get_current_options)
-        try {
-            registerReceiver(runAsync, filter)
-        } catch (e: Exception) {}
-
-        // manually check root
-        /*val rootGranted = root.run("id", true)
-        if (!rootGranted.contains("root")) {
-            dismissNotification()
-            return START_NOT_STICKY
-        }*/
-
         MainActivity.arch = Utils.getArchitecture()
         Utils.verifyCompat(applicationContext)
-
         MainActivity.bin = Utils.getBinName()
         MainActivity.pathBin = Utils.getBinPath(applicationContext)
-
         Utils.writeBin(applicationContext)
 
-        // Utils.runBin() is written out raw here
-        runnableAsync(applicationContext, Runnable {
-            var extraArgs = ""
-            if (MainActivity.prefs.getBoolean("low_mem", false))
-                extraArgs += "-m "
-            if (MainActivity.prefs.getBoolean("disable_power_aware", false))
-                extraArgs += "-p "
-            val command = "[ `pgrep ${MainActivity.bin}` ] || ${MainActivity.pathBin} $extraArgs &"
-            newRoot.run(command, true)
-
-            try {
-                this.unregisterReceiver(com.draco.subcore.runAsync)
-            } catch (e: Exception) {}
-        })
+        var extraArgs = ""
+        if (MainActivity.prefs.getBoolean("low_mem", false))
+            extraArgs += "-m "
+        if (MainActivity.prefs.getBoolean("disable_power_aware", false))
+            extraArgs += "-p "
+        val command = "[ `pgrep ${MainActivity.bin}` ] || ${MainActivity.pathBin} $extraArgs &"
+        Shell.su(command).exec()
 
         dismissNotification()
-
         return START_NOT_STICKY
     }
 }

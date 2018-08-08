@@ -5,7 +5,6 @@ import android.content.Intent
 import android.support.v7.app.AlertDialog
 import android.view.LayoutInflater
 
-lateinit var root: Root
 lateinit var runAsync: RunAsync
 
 const val filter_get_current_options = "RUN_ASYNC"
