@@ -80,7 +80,7 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
 
         optFrag.applyOnBoot = {
             val isChecked = (optFrag.preferenceManager.findPreference("apply_on_boot") as CheckBoxPreference).isChecked
-            editor.putBoolean("low_mem", isChecked)
+            editor.putBoolean("apply_on_boot", isChecked)
             editor.apply()
         }
 
