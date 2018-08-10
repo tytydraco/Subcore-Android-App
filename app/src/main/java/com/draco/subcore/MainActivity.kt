@@ -44,6 +44,14 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
         var running = false
 
         lateinit var optFrag: OptionFragment
+        fun isFragInit(): Boolean {
+            return try {
+                optFrag
+                true
+            } catch (_: UninitializedPropertyAccessException) {
+                false
+            }
+        }
 
         val RSA_PRIVATE_KEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAjNtzFmxMD6g+5pRzMh1P4V/3dIx88FPRalUZ+c2YnH9jI1k5NsM/fxrNpJVojRLkvmq2L9EIASacZ9pp3XS1f9JtCtyzVXIXUpyEJrTm5Ntm9vaw3YlBOKmyU0FmSEQ4KRCU77V3dxGzNdadsMaWz/ooccidNE28yISFqYT++tRD2lD4FzUfHSqZv+P6L89ZmILlQ71sGv5TDVzIAadqlLrvp6E639NTBFdjSNjXXwVEcSDFBmmqq6YDsvLYSMf9SGX8YsCDAo2MSlzaGV92CwiMUhuxZNIbcawPeA1raQq8KpQ0zNTchcw/GbXQSO1b6jx/2MiseJlkuICq9msglwIDAQAB"
         val SALT = byteArrayOf(-81, 40, 92, 27, -18, -14, 98, 8, 91, 95, -5, 21, 26, -24, 54, -88, 62, 16, -42, -86)
@@ -64,7 +72,7 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
         opts.registerOnSharedPreferenceChangeListener(this)
 
         // could end up with overlapping fragments
-        if (savedInstanceState == null) {
+        if (savedInstanceState == null && !isFragInit()) {
             optFrag = OptionFragment()
             optFrag.retainInstance = true
 
