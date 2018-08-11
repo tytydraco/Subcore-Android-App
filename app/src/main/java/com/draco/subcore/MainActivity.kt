@@ -90,7 +90,23 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
         Shell.Config.setFlags(Shell.FLAG_REDIRECT_STDERR)
         Shell.Config.verboseLogging(BuildConfig.DEBUG)
 
-        PreferenceManager.getDefaultSharedPreferences(this)
+        optFrag.applyOnBoot = {
+            val isChecked = (optFrag.preferenceManager.findPreference("apply_on_boot") as CheckBoxPreference).isChecked
+            editor.putBoolean("apply_on_boot", isChecked)
+            editor.apply()
+        }
+
+        optFrag.lowMem = {
+            val isChecked = (optFrag.preferenceManager.findPreference("low_mem") as CheckBoxPreference).isChecked
+            editor.putBoolean("low_mem", isChecked)
+            editor.apply()
+        }
+
+        optFrag.disablePowerAware = {
+            val isChecked = (optFrag.preferenceManager.findPreference("disable_power_aware") as CheckBoxPreference).isChecked
+            editor.putBoolean("disable_power_aware", isChecked)
+            editor.apply()
+        }
 
         optFrag.info = {
             startActivity(Intent(MainActivity@this, InfoActivity::class.java))
