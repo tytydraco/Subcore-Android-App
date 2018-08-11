@@ -68,6 +68,9 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
 
+        prefs = getSharedPreferences("subcore", Context.MODE_PRIVATE)
+        editor = prefs.edit()
+
         val opts = PreferenceManager.getDefaultSharedPreferences(baseContext)
         opts.registerOnSharedPreferenceChangeListener(this)
 
@@ -136,9 +139,6 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
                         RSA_PRIVATE_KEY)
         mLicenseCheckerCallback = MyLicenseCheckerCallback()
         securePrefs = SecurePreferences(this, "subcore-secure", RSA_PRIVATE_KEY, true)
-
-        prefs = getSharedPreferences("subcore", Context.MODE_PRIVATE)
-        editor = prefs.edit()
 
         /*if (securePrefs.getString("licensed") != "1")
             doCheck()
