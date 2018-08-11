@@ -2,6 +2,7 @@ package com.draco.subcore
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.os.Build
 import android.support.v7.app.AlertDialog
 import com.topjohnwu.superuser.Shell
 
@@ -53,16 +54,18 @@ class Utils {
         }
 
         fun getArchitecture(): String {
-            return when (getProp("ro.product.cpu.abi")) {
-                "armeabi" -> "arm"
-                "armeabi-v7a" -> "arm"
-                "x86" -> "x86"
-                "arm64-v8a" -> "arm64"
-                "x86_64" -> "x64"
-                "mips" -> "mips"
-                "mips64" -> "mips64"
-                else -> "other"
+            for (abi: String in Build.SUPPORTED_ABIS) {
+                when (abi) {
+                    "armeabi" -> return "arm"
+                    "armeabi-v7a" -> return "arm"
+                    "x86" -> return "x86"
+                    "arm64-v8a" -> return "arm64"
+                    "x86_64" -> return "x64"
+                    "mips" -> return "mips"
+                    "mips64" -> return "mips64"
+                }
             }
+            return "other"
         }
 
         fun verifyCompat(context: Context) {

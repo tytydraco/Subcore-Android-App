@@ -40,6 +40,7 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
         lateinit var editor: SharedPreferences.Editor
 
         lateinit var securePrefs: SecurePreferences
+        lateinit var optPrefs: SharedPreferences
 
         var running = false
 
@@ -89,23 +90,7 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
         Shell.Config.setFlags(Shell.FLAG_REDIRECT_STDERR)
         Shell.Config.verboseLogging(BuildConfig.DEBUG)
 
-        optFrag.applyOnBoot = {
-            val isChecked = (optFrag.preferenceManager.findPreference("apply_on_boot") as CheckBoxPreference).isChecked
-            editor.putBoolean("apply_on_boot", isChecked)
-            editor.apply()
-        }
-
-        optFrag.lowMem = {
-            val isChecked = (optFrag.preferenceManager.findPreference("low_mem") as CheckBoxPreference).isChecked
-            editor.putBoolean("low_mem", isChecked)
-            editor.apply()
-        }
-
-        optFrag.disablePowerAware = {
-            val isChecked = (optFrag.preferenceManager.findPreference("disable_power_aware") as CheckBoxPreference).isChecked
-            editor.putBoolean("disable_power_aware", isChecked)
-            editor.apply()
-        }
+        PreferenceManager.getDefaultSharedPreferences(this)
 
         optFrag.info = {
             startActivity(Intent(MainActivity@this, InfoActivity::class.java))
@@ -280,9 +265,9 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
                 .setTitle("Unlicensed")
                 .setMessage("This app is potentially stolen, or Google is having an internal server issue.")
                 .setCancelable(false)
-                .setOnDismissListener({
+                .setOnDismissListener {
                     System.exit(1)
-                }).setPositiveButton("Ok", null)
+                }.setPositiveButton("Ok", null)
                 .show()
     }
 
