@@ -3,6 +3,7 @@ package com.draco.subcore
 import android.os.Bundle
 import android.preference.CheckBoxPreference
 import android.preference.PreferenceFragment
+import android.widget.ListView
 
 class OptionFragment : PreferenceFragment() {
     lateinit var applyOnBoot: () -> Unit
@@ -46,5 +47,10 @@ class OptionFragment : PreferenceFragment() {
         (findPreference("apply_on_boot") as CheckBoxPreference).isChecked = MainActivity.prefs.getBoolean("apply_on_boot", false)
         (findPreference("low_mem") as CheckBoxPreference).isChecked = MainActivity.prefs.getBoolean("low_mem", false)
         (findPreference("disable_power_aware") as CheckBoxPreference).isChecked = MainActivity.prefs.getBoolean("disable_power_aware", false)
+    }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        view?.findViewById<ListView>(android.R.id.list)?.divider = null
     }
 }

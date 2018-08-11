@@ -7,7 +7,7 @@
     tools:context=".MainActivity"
     android:orientation="vertical"
     android:gravity="center_horizontal|bottom"
-    android:background="@color/colorPrimary">
+    android:background="#282c34">
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
@@ -37,6 +37,7 @@
         android:padding="10dp"
         android:background="@drawable/rounded_drawable_default"
         android:textSize="20sp"
-        android:text="@string/loading"/>
+        android:text="@string/loading"
+        android:textColor="#ffffff"/>
 
 </LinearLayout>
