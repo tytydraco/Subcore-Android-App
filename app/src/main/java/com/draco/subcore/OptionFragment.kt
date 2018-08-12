@@ -9,7 +9,7 @@ class OptionFragment : PreferenceFragment() {
     lateinit var applyOnBoot: () -> Unit
     lateinit var lowMem: () -> Unit
     lateinit var disablePowerAware: () -> Unit
-    lateinit var info: () -> Unit
+    lateinit var about: () -> Unit
     lateinit var killAll: () -> Unit
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,8 +33,8 @@ class OptionFragment : PreferenceFragment() {
                 return@setOnPreferenceClickListener true
             }
 
-            findPreference("info").setOnPreferenceClickListener {
-                info()
+            findPreference("about").setOnPreferenceClickListener {
+                about()
                 return@setOnPreferenceClickListener true
             }
 
@@ -43,10 +43,6 @@ class OptionFragment : PreferenceFragment() {
                 return@setOnPreferenceClickListener true
             }
         }
-
-        (findPreference("apply_on_boot") as CheckBoxPreference).isChecked = MainActivity.prefs.getBoolean("apply_on_boot", false)
-        (findPreference("low_mem") as CheckBoxPreference).isChecked = MainActivity.prefs.getBoolean("low_mem", false)
-        (findPreference("disable_power_aware") as CheckBoxPreference).isChecked = MainActivity.prefs.getBoolean("disable_power_aware", false)
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {

@@ -9,25 +9,13 @@
     android:gravity="center_horizontal|bottom"
     android:background="#282c34">
 
-    <android.support.design.widget.AppBarLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary" />
-    </android.support.design.widget.AppBarLayout>
-
     <LinearLayout
         android:id="@+id/optContainer"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:orientation="vertical"
-        android:gravity="top">
-
-    </LinearLayout>
+        android:gravity="top" />
 
     <Button
         android:layout_width="match_parent"

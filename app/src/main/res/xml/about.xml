@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+        android:title="About">
+        <Preference
+            android:title="Developer"
+            android:summary="Draco (Tyler Nijmeh)"
+            android:selectable="false"
+            android:key="developer" />
+        <Preference
+            android:title="Version"
+            android:key="version" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="Support">
+        <Preference
+            android:title="Contact"
+            android:summary="Send me suggestions, questions, criticism, etc."
+            android:key="contact" />
+        <Preference
+            android:title="Other Apps"
+            android:summary="See some other applications I have published."
+            android:key="other_apps" />
+        <Preference
+            android:title="Donate"
+            android:summary="Help support me and my hobby."
+            android:key="donate" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

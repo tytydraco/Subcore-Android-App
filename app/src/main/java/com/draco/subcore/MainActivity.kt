@@ -9,6 +9,7 @@ import android.graphics.drawable.TransitionDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
 import android.preference.CheckBoxPreference
 import android.preference.Preference
 import android.preference.PreferenceManager
@@ -17,8 +18,6 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
-import android.view.Menu
-import android.view.MenuItem
 import android.view.animation.AnimationUtils
 import android.widget.Button
 import com.google.android.vending.licensing.AESObfuscator
@@ -38,9 +37,7 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
 
         lateinit var prefs: SharedPreferences
         lateinit var editor: SharedPreferences.Editor
-
         lateinit var securePrefs: SecurePreferences
-        lateinit var optPrefs: SharedPreferences
 
         var running = false
 
@@ -65,9 +62,6 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-        val toolbar = findViewById<Toolbar>(R.id.toolbar)
-        setSupportActionBar(toolbar)
 
         prefs = getSharedPreferences("subcore", Context.MODE_PRIVATE)
         editor = prefs.edit()
@@ -108,8 +102,8 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
             editor.apply()
         }
 
-        optFrag.info = {
-            startActivity(Intent(MainActivity@this, InfoActivity::class.java))
+        optFrag.about = {
+            startActivity(Intent(MainActivity@this, AboutActivity::class.java))
         }
 
         optFrag.killAll = {
@@ -192,7 +186,7 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
                     toggleButton.text = resources.getText(R.string.off)
                 }
                 (optFrag.preferenceManager.findPreference("apply_on_boot") as CheckBoxPreference).isEnabled = true
-                (optFrag.preferenceManager.findPreference("info") as Preference).isEnabled = true
+                (optFrag.preferenceManager.findPreference("about") as Preference).isEnabled = true
                 (optFrag.preferenceManager.findPreference("kill_all") as Preference).isEnabled = true
             }
 
@@ -247,29 +241,6 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
 
     override fun onSharedPreferenceChanged(pref: SharedPreferences?, key: String?) {
 
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.menu, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        val id = item.itemId
-        return when (id) {
-            R.id.donate -> {
-                val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://paypal.me/TylerNijmeh"))
-                startActivity(browserIntent)
-                true
-            }
-            R.id.contact -> {
-                val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("mailto:tylernij@gmail.com"))
-                startActivity(browserIntent)
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
-        }
     }
 
     private fun doCheck() {

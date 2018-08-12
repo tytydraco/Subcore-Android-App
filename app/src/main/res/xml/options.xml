@@ -19,9 +19,9 @@
         android:key="disable_power_aware"
         android:enabled="false"/>
     <Preference
-        android:title="Info"
-        android:summary="Learn about how the Subcore algorithm works in detail."
-        android:key="info"
+        android:title="About"
+        android:summary="Extra information about Subcore."
+        android:key="about"
         android:enabled="false"/>
     <Preference
         android:title="Kill All"
