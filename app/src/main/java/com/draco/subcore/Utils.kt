@@ -1,6 +1,5 @@
 package com.draco.subcore
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
 import android.support.v7.app.AlertDialog
@@ -74,9 +73,9 @@ class Utils {
                     AlertDialog.Builder(context)
                             .setTitle("Unsupported Architecture")
                             .setMessage("Your device is unsupported (MIPS).")
-                            .setPositiveButton("Ok", { _, _ ->
+                            .setPositiveButton("Ok") { _, _ ->
                                 System.exit(1)
-                            })
+                            }
                             .setCancelable(false)
                             .show()
                 } catch (e: Exception) {}
@@ -96,17 +95,6 @@ class Utils {
                 "x86" -> "subcore_x86"
                 "x86_64" -> "subcore_x86_64"
                 else -> "subcore_arm"
-            }
-        }
-
-        @SuppressLint("PrivateApi")
-        private fun getProp(prop: String): String? {
-            return try {
-                val clazz = Class.forName("android.os.SystemProperties")
-                val method = clazz.getDeclaredMethod("get", java.lang.String::class.java)
-                method.invoke(null, prop) as String
-            } catch (e: Exception) {
-                ""
             }
         }
     }
