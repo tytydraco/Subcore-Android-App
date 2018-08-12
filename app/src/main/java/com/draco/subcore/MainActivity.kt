@@ -36,6 +36,8 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
         lateinit var editor: SharedPreferences.Editor
         lateinit var securePrefs: SecurePreferences
 
+        lateinit var updateUIReceiver: BroadcastReceiver
+
         var running = false
 
         lateinit var optFrag: OptionFragment
@@ -143,12 +145,19 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
             doCheck()
         */
 
-        runAsync = RunAsync()
+        updateUIReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent_: Intent) {
+                finish()
+                startActivity(intent)
+            }
+        }
 
-        // setup get_current_objects async task
+        runAsync = RunAsync()
         val filter = IntentFilter(filter_get_current_options)
+        val filter2 = IntentFilter(filter_refresh_ui)
         try {
             registerReceiver(runAsync, filter)
+            registerReceiver(updateUIReceiver, filter2)
         } catch (e: Exception) {}
 
         toggleButton = findViewById(R.id.toggle)
@@ -178,12 +187,14 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
                 // set the UI elements
                 if (Utils.binRunning()) {
                     running = true
+                    editor.putBoolean("enabled", true)
                     (optFrag.preferenceManager.findPreference("low_mem") as CheckBoxPreference).isEnabled = false
                     (optFrag.preferenceManager.findPreference("disable_power_aware") as CheckBoxPreference).isEnabled = false
                     toggleButton.background = ContextCompat.getDrawable(MainActivity@this, R.drawable.rounded_drawable_green)
                     toggleButton.text = resources.getText(R.string.on)
                 } else {
                     running = false
+                    editor.putBoolean("enabled", false)
                     (optFrag.preferenceManager.findPreference("low_mem") as CheckBoxPreference).isEnabled = true
                     (optFrag.preferenceManager.findPreference("disable_power_aware") as CheckBoxPreference).isEnabled = true
                     toggleButton.background = ContextCompat.getDrawable(MainActivity@this, R.drawable.rounded_drawable_red)
@@ -196,6 +207,7 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
 
             Utils.writeBin(this)
             toggleButton.isEnabled = true
+            editor.apply()
         }, true)
 
         toggleButton.setOnClickListener {
@@ -214,16 +226,19 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
 
             runnableAsync(this, Runnable {
                 if (running) {
+                    editor.putBoolean("enabled", false)
                     Utils.killBin(this)
                     toggleButton.text = resources.getText(R.string.off)
                     (optFrag.preferenceManager.findPreference("low_mem") as CheckBoxPreference).isEnabled = true
                     (optFrag.preferenceManager.findPreference("disable_power_aware") as CheckBoxPreference).isEnabled = true
                 } else {
+                    editor.putBoolean("enabled", true)
                     Utils.runBin(this)
                     toggleButton.text = resources.getText(R.string.on)
                     (optFrag.preferenceManager.findPreference("low_mem") as CheckBoxPreference).isEnabled = false
                     (optFrag.preferenceManager.findPreference("disable_power_aware") as CheckBoxPreference).isEnabled = false
                 }
+                editor.apply()
                 running = !running
             }, true)
         }
@@ -240,6 +255,7 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
         super.onDestroy()
         try {
             unregisterReceiver(runAsync)
+            unregisterReceiver(updateUIReceiver)
         } catch (e: Exception) {}
     }
 

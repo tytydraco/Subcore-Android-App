@@ -32,7 +32,7 @@
         android:title="Testers">
         <Preference
             android:title="dotMiracle"
-            android:summary="The first Redmi device Tester to help me test Subcore."
+            android:summary="The first Redmi device tester to help me test Subcore."
             android:selectable="false"/>
         <Preference
             android:title="EFranz"

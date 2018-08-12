@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 lateinit var runAsync: RunAsync
 
 const val filter_get_current_options = "RUN_ASYNC"
+const val filter_refresh_ui = "REFRESH_UI"
 
 fun runnableAsync(context: Context, runnable: Runnable, ui: Boolean = true) {
     RunAsync.runnable = runnable
