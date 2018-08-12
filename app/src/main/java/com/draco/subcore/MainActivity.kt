@@ -1,10 +1,7 @@
 package com.draco.subcore
 
 import android.annotation.SuppressLint
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
-import android.content.SharedPreferences
+import android.content.*
 import android.graphics.drawable.TransitionDrawable
 import android.net.Uri
 import android.os.Build
@@ -107,23 +104,30 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
         }
 
         optFrag.killAll = {
-            if (running) {
-                val popAnim = AnimationUtils.loadAnimation(this, R.anim.pop)
-                toggleButton.startAnimation(popAnim)
+            AlertDialog.Builder(this)
+                    .setTitle("Kill All")
+                    .setMessage("Are you sure you would like to kill all instances of Subcore?")
+                    .setPositiveButton("Yes") { _, _ ->
+                        if (running) {
+                            val popAnim = AnimationUtils.loadAnimation(this, R.anim.pop)
+                            toggleButton.startAnimation(popAnim)
 
-                toggleButton.background = ContextCompat.getDrawable(this, R.drawable.transition_enable_disable)
-                val transition = toggleButton.background as TransitionDrawable
+                            toggleButton.background = ContextCompat.getDrawable(this, R.drawable.transition_enable_disable)
+                            val transition = toggleButton.background as TransitionDrawable
 
-                transition.startTransition(300)
-            }
+                            transition.startTransition(300)
+                        }
 
-            runnableAsync(this, Runnable {
-                Utils.killBin(this)
-                toggleButton.text = resources.getText(R.string.off)
-                (MainActivity.optFrag.preferenceManager.findPreference("low_mem") as CheckBoxPreference).isEnabled = true
-                (MainActivity.optFrag.preferenceManager.findPreference("disable_power_aware") as CheckBoxPreference).isEnabled = true
-                running = false
-            }, true)
+                        runnableAsync(this, Runnable {
+                            Utils.killBin(this)
+                            toggleButton.text = resources.getText(R.string.off)
+                            (MainActivity.optFrag.preferenceManager.findPreference("low_mem") as CheckBoxPreference).isEnabled = true
+                            (MainActivity.optFrag.preferenceManager.findPreference("disable_power_aware") as CheckBoxPreference).isEnabled = true
+                            running = false
+                        }, true)
+                    }
+                    .setNegativeButton("No", null)
+                    .show()
         }
 
         mChecker = LicenseChecker(
