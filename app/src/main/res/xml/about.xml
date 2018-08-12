@@ -51,7 +51,7 @@
             android:summary="Helped find a bug with hotplugging that I would have never found by myself."
             android:selectable="false"/>
         <Preference
-            android:title="Mounster"
+            android:title="Mountaser"
             android:summary="Occasionally dropping in with comments and feedback."
             android:selectable="false"/>
     </PreferenceCategory>
