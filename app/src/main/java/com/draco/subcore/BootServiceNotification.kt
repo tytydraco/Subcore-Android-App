@@ -31,7 +31,7 @@ class BootServiceNotification : Service() {
             notificationManager.createNotificationChannel(channel)
 
             val notification = NotificationCompat.Builder(this, CHANNEL_ID)
-                    .setSmallIcon(R.drawable.notification_icon)
+                    .setSmallIcon(R.drawable.ic_white_icon)
                     .setContentTitle("Initializing")
                     .setContentText("Starting daemon on boot.").build()
 

@@ -6,7 +6,6 @@ import android.support.annotation.RequiresApi
 import android.service.quicksettings.Tile
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 
 @RequiresApi(Build.VERSION_CODES.N)
 class TileService : TileService() {
