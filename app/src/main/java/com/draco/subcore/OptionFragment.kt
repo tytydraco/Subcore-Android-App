@@ -1,7 +1,6 @@
 package com.draco.subcore
 
 import android.os.Bundle
-import android.preference.CheckBoxPreference
 import android.preference.PreferenceFragment
 import android.widget.ListView
 

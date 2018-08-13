@@ -1,36 +1,45 @@
 package com.draco.subcore
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.os.Build
 import android.support.v7.app.AlertDialog
 import com.topjohnwu.superuser.Shell
 
 class Utils {
     companion object {
-        fun runBin(context: Context) {
-            runnableAsync(context, Runnable {
+        lateinit var arch: String
+        lateinit var bin: String
+        lateinit var pathBin: String
+
+        lateinit var prefs: SharedPreferences
+        lateinit var editor: SharedPreferences.Editor
+        lateinit var securePrefs: SecurePreferences
+
+        fun runBin() {
+            asyncExec {
                 var extraArgs = ""
-                if (MainActivity.prefs.getBoolean("low_mem", false))
+                if (prefs.getBoolean("low_mem", false))
                     extraArgs += "-m "
-                if (MainActivity.prefs.getBoolean("disable_power_aware", false))
+                if (prefs.getBoolean("disable_power_aware", false))
                     extraArgs += "-p "
-                val command = "[ `pgrep ${MainActivity.bin}` ] || ${MainActivity.pathBin} $extraArgs &"
+                val command = "[ `pgrep $bin` ] || $pathBin $extraArgs &"
                 Shell.su(command).exec()
-            }, false)
+            }
         }
 
-        fun killBin(context: Context) {
-            runnableAsync(context, Runnable {
-                Shell.su("killall ${MainActivity.bin}").exec()
-            }, false)
+        fun killBin() {
+            asyncExec {
+                Shell.su("killall $bin").exec()
+            }
         }
 
         fun binRunning(): Boolean {
-            return Shell.su("[ `pgrep ${MainActivity.bin}` ] && echo 1").exec().isSuccess
+            return Shell.su("[ `pgrep $bin` ] && echo 1").exec().isSuccess
         }
 
         fun writeBin(context: Context) {
-            val ins =  when (MainActivity.arch) {
+            val ins =  when (arch) {
                 "arm" -> context.resources.openRawResource(R.raw.subcore_arm)
                 "arm64" -> context.resources.openRawResource(R.raw.subcore_arm64)
                 "x86" -> context.resources.openRawResource(R.raw.subcore_x86)
@@ -68,7 +77,7 @@ class Utils {
         }
 
         fun verifyCompat(context: Context) {
-            if (MainActivity.arch == "mips" || MainActivity.arch == "mips64" || MainActivity.arch == "other") {
+            if (arch == "mips" || arch == "mips64" || arch == "other") {
                 try {
                     AlertDialog.Builder(context)
                             .setTitle("Unsupported Architecture")
@@ -85,11 +94,11 @@ class Utils {
         fun getBinPath(context: Context): String {
             val appFileDirectory = context.filesDir.path
             val executableFilePath = "$appFileDirectory/"
-            return executableFilePath + MainActivity.bin
+            return executableFilePath + bin
         }
 
         fun getBinName(): String {
-            return when (MainActivity.arch) {
+            return when (arch) {
                 "arm" -> "subcore_arm"
                 "arm64" -> "subcore_arm64"
                 "x86" -> "subcore_x86"

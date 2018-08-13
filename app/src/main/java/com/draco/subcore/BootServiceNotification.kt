@@ -54,20 +54,15 @@ class BootServiceNotification : Service() {
             return START_NOT_STICKY
         }
 
-        MainActivity.prefs = getSharedPreferences("subcore", Context.MODE_PRIVATE)
-        MainActivity.arch = Utils.getArchitecture()
+        Utils.prefs = getSharedPreferences("subcore", Context.MODE_PRIVATE)
+        Utils.editor = Utils.prefs.edit()
+        Utils.arch = Utils.getArchitecture()
         Utils.verifyCompat(applicationContext)
-        MainActivity.bin = Utils.getBinName()
-        MainActivity.pathBin = Utils.getBinPath(applicationContext)
+        Utils.bin = Utils.getBinName()
+        Utils.pathBin = Utils.getBinPath(applicationContext)
         Utils.writeBin(applicationContext)
-
-        var extraArgs = ""
-        if (MainActivity.prefs.getBoolean("low_mem", false))
-            extraArgs += "-m "
-        if (MainActivity.prefs.getBoolean("disable_power_aware", false))
-            extraArgs += "-p "
-        val command = "[ `pgrep ${MainActivity.bin}` ] || ${MainActivity.pathBin} $extraArgs &"
-        Shell.su(command).exec()
+        Utils.runBin()
+        Utils.editor.putBoolean("enabled", true).apply()
 
         dismissNotification()
         return START_NOT_STICKY

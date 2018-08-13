@@ -28,18 +28,8 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
     private lateinit var toggleButton: Button
 
     companion object {
-        lateinit var arch: String
-        lateinit var bin: String
-        lateinit var pathBin: String
-
-        lateinit var prefs: SharedPreferences
-        lateinit var editor: SharedPreferences.Editor
-        lateinit var securePrefs: SecurePreferences
-
         lateinit var updateUIReceiver: BroadcastReceiver
-
         var running = false
-
         lateinit var optFrag: OptionFragment
         fun isFragInit(): Boolean {
             return try {
@@ -50,7 +40,7 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
             }
         }
 
-        val RSA_PRIVATE_KEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAjNtzFmxMD6g+5pRzMh1P4V/3dIx88FPRalUZ+c2YnH9jI1k5NsM/fxrNpJVojRLkvmq2L9EIASacZ9pp3XS1f9JtCtyzVXIXUpyEJrTm5Ntm9vaw3YlBOKmyU0FmSEQ4KRCU77V3dxGzNdadsMaWz/ooccidNE28yISFqYT++tRD2lD4FzUfHSqZv+P6L89ZmILlQ71sGv5TDVzIAadqlLrvp6E639NTBFdjSNjXXwVEcSDFBmmqq6YDsvLYSMf9SGX8YsCDAo2MSlzaGV92CwiMUhuxZNIbcawPeA1raQq8KpQ0zNTchcw/GbXQSO1b6jx/2MiseJlkuICq9msglwIDAQAB"
+        const val RSA_PRIVATE_KEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAjNtzFmxMD6g+5pRzMh1P4V/3dIx88FPRalUZ+c2YnH9jI1k5NsM/fxrNpJVojRLkvmq2L9EIASacZ9pp3XS1f9JtCtyzVXIXUpyEJrTm5Ntm9vaw3YlBOKmyU0FmSEQ4KRCU77V3dxGzNdadsMaWz/ooccidNE28yISFqYT++tRD2lD4FzUfHSqZv+P6L89ZmILlQ71sGv5TDVzIAadqlLrvp6E639NTBFdjSNjXXwVEcSDFBmmqq6YDsvLYSMf9SGX8YsCDAo2MSlzaGV92CwiMUhuxZNIbcawPeA1raQq8KpQ0zNTchcw/GbXQSO1b6jx/2MiseJlkuICq9msglwIDAQAB"
         val SALT = byteArrayOf(-81, 40, 92, 27, -18, -14, 98, 8, 91, 95, -5, 21, 26, -24, 54, -88, 62, 16, -42, -86)
     }
 
@@ -62,11 +52,25 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        prefs = getSharedPreferences("subcore", Context.MODE_PRIVATE)
-        editor = prefs.edit()
+        Utils.prefs = getSharedPreferences("subcore", Context.MODE_PRIVATE)
+        Utils.editor = Utils.prefs.edit()
 
         val opts = PreferenceManager.getDefaultSharedPreferences(baseContext)
         opts.registerOnSharedPreferenceChangeListener(this)
+
+        updateUIReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent_: Intent) {
+                try {
+                    unregisterReceiver(updateUIReceiver)
+                } catch (_: Exception) {}
+                recreate()
+            }
+        }
+
+        try {
+            val filter2 = IntentFilter(filter_refresh_ui)
+            registerReceiver(updateUIReceiver, filter2)
+        } catch (_: Exception) {}
 
         // could end up with overlapping fragments
         if (savedInstanceState == null || !isFragInit()) {
@@ -85,20 +89,20 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
 
         optFrag.applyOnBoot = {
             val isChecked = (optFrag.preferenceManager.findPreference("apply_on_boot") as CheckBoxPreference).isChecked
-            editor.putBoolean("apply_on_boot", isChecked)
-            editor.apply()
+            Utils.editor.putBoolean("apply_on_boot", isChecked)
+            Utils.editor.apply()
         }
 
         optFrag.lowMem = {
             val isChecked = (optFrag.preferenceManager.findPreference("low_mem") as CheckBoxPreference).isChecked
-            editor.putBoolean("low_mem", isChecked)
-            editor.apply()
+            Utils.editor.putBoolean("low_mem", isChecked)
+            Utils.editor.apply()
         }
 
         optFrag.disablePowerAware = {
             val isChecked = (optFrag.preferenceManager.findPreference("disable_power_aware") as CheckBoxPreference).isChecked
-            editor.putBoolean("disable_power_aware", isChecked)
-            editor.apply()
+            Utils.editor.putBoolean("disable_power_aware", isChecked)
+            Utils.editor.apply()
         }
 
         optFrag.about = {
@@ -120,13 +124,15 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
                             transition.startTransition(300)
                         }
 
-                        runnableAsync(this, Runnable {
-                            Utils.killBin(this)
-                            toggleButton.text = resources.getText(R.string.off)
-                            (MainActivity.optFrag.preferenceManager.findPreference("low_mem") as CheckBoxPreference).isEnabled = true
-                            (MainActivity.optFrag.preferenceManager.findPreference("disable_power_aware") as CheckBoxPreference).isEnabled = true
+                        asyncExec {
+                            Utils.killBin()
+                            runOnUiThread {
+                                toggleButton.text = resources.getText(R.string.off)
+                                (MainActivity.optFrag.preferenceManager.findPreference("low_mem") as CheckBoxPreference).isEnabled = true
+                                (MainActivity.optFrag.preferenceManager.findPreference("disable_power_aware") as CheckBoxPreference).isEnabled = true
+                            }
                             running = false
-                        }, true)
+                        }
                     }
                     .setNegativeButton("No", null)
                     .show()
@@ -139,32 +145,16 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
                         Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID))),
                         RSA_PRIVATE_KEY)
         mLicenseCheckerCallback = MyLicenseCheckerCallback()
-        securePrefs = SecurePreferences(this, "subcore-secure", RSA_PRIVATE_KEY, true)
+        Utils.securePrefs = SecurePreferences(this, "subcore-secure", RSA_PRIVATE_KEY, true)
 
         /*if (securePrefs.getString("licensed") != "1")
             doCheck()
         */
 
-        updateUIReceiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context, intent_: Intent) {
-                finish()
-                startActivity(intent)
-            }
-        }
-
-        runAsync = RunAsync()
-        val filter = IntentFilter(filter_get_current_options)
-        val filter2 = IntentFilter(filter_refresh_ui)
-        try {
-            registerReceiver(runAsync, filter)
-            registerReceiver(updateUIReceiver, filter2)
-        } catch (e: Exception) {}
-
         toggleButton = findViewById(R.id.toggle)
         toggleButton.isEnabled = false
 
-        runnableAsync(this, Runnable {
-
+        asyncExec {
             if (!Shell.rootAccess()) {
                 AlertDialog.Builder(MainActivity@ this)
                         .setTitle("Root Denied")
@@ -174,27 +164,27 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
                         }
                         .setCancelable(false)
                         .show()
-                return@Runnable
+                return@asyncExec
             }
 
-            arch = Utils.getArchitecture()
+            Utils.arch = Utils.getArchitecture()
             Utils.verifyCompat(this)
 
-            bin = Utils.getBinName()
-            pathBin = Utils.getBinPath(this)
+            Utils.bin = Utils.getBinName()
+            Utils.pathBin = Utils.getBinPath(this)
 
             runOnUiThread {
                 // set the UI elements
                 if (Utils.binRunning()) {
                     running = true
-                    editor.putBoolean("enabled", true)
+                    Utils.editor.putBoolean("enabled", true)
                     (optFrag.preferenceManager.findPreference("low_mem") as CheckBoxPreference).isEnabled = false
                     (optFrag.preferenceManager.findPreference("disable_power_aware") as CheckBoxPreference).isEnabled = false
                     toggleButton.background = ContextCompat.getDrawable(MainActivity@this, R.drawable.rounded_drawable_green)
                     toggleButton.text = resources.getText(R.string.on)
                 } else {
                     running = false
-                    editor.putBoolean("enabled", false)
+                    Utils.editor.putBoolean("enabled", false)
                     (optFrag.preferenceManager.findPreference("low_mem") as CheckBoxPreference).isEnabled = true
                     (optFrag.preferenceManager.findPreference("disable_power_aware") as CheckBoxPreference).isEnabled = true
                     toggleButton.background = ContextCompat.getDrawable(MainActivity@this, R.drawable.rounded_drawable_red)
@@ -203,12 +193,13 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
                 (optFrag.preferenceManager.findPreference("apply_on_boot") as CheckBoxPreference).isEnabled = true
                 (optFrag.preferenceManager.findPreference("about") as Preference).isEnabled = true
                 (optFrag.preferenceManager.findPreference("kill_all") as Preference).isEnabled = true
+
+                toggleButton.isEnabled = true
             }
 
             Utils.writeBin(this)
-            toggleButton.isEnabled = true
-            editor.apply()
-        }, true)
+            Utils.editor.apply()
+        }
 
         toggleButton.setOnClickListener {
             val popAnim = AnimationUtils.loadAnimation(this, R.anim.pop)
@@ -224,39 +215,43 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
                 transition.reverseTransition(300)
             }
 
-            runnableAsync(this, Runnable {
+            asyncExec {
                 if (running) {
-                    editor.putBoolean("enabled", false)
-                    Utils.killBin(this)
-                    toggleButton.text = resources.getText(R.string.off)
-                    (optFrag.preferenceManager.findPreference("low_mem") as CheckBoxPreference).isEnabled = true
-                    (optFrag.preferenceManager.findPreference("disable_power_aware") as CheckBoxPreference).isEnabled = true
+                    Utils.editor.putBoolean("enabled", false)
+                    Utils.killBin()
+                    runOnUiThread {
+                        toggleButton.text = resources.getText(R.string.off)
+                        (optFrag.preferenceManager.findPreference("low_mem") as CheckBoxPreference).isEnabled = true
+                        (optFrag.preferenceManager.findPreference("disable_power_aware") as CheckBoxPreference).isEnabled = true
+                    }
                 } else {
-                    editor.putBoolean("enabled", true)
-                    Utils.runBin(this)
-                    toggleButton.text = resources.getText(R.string.on)
-                    (optFrag.preferenceManager.findPreference("low_mem") as CheckBoxPreference).isEnabled = false
-                    (optFrag.preferenceManager.findPreference("disable_power_aware") as CheckBoxPreference).isEnabled = false
+                    Utils.editor.putBoolean("enabled", true)
+                    Utils.runBin()
+                    runOnUiThread {
+                        toggleButton.text = resources.getText(R.string.on)
+                        (optFrag.preferenceManager.findPreference("low_mem") as CheckBoxPreference).isEnabled = false
+                        (optFrag.preferenceManager.findPreference("disable_power_aware") as CheckBoxPreference).isEnabled = false
+                    }
                 }
-                editor.apply()
+                Utils.editor.apply()
                 running = !running
-            }, true)
+            }
         }
 
-        if (prefs.getBoolean("first_run", true)) {
+        if (Utils.prefs.getBoolean("first_run", true)) {
             if (Build.MANUFACTURER.toLowerCase().contains("samsung"))
-                editor.putBoolean("low_mem", true)
-            editor.putBoolean("first_run", false)
-            editor.apply()
+                Utils.editor.putBoolean("low_mem", true)
+            Utils.editor.putBoolean("first_run", false)
+            Utils.editor.apply()
         }
     }
+
 
     public override fun onDestroy() {
         super.onDestroy()
         try {
-            unregisterReceiver(runAsync)
             unregisterReceiver(updateUIReceiver)
-        } catch (e: Exception) {}
+        } catch (_: Exception) {}
     }
 
     override fun onSharedPreferenceChanged(pref: SharedPreferences?, key: String?) {
@@ -286,8 +281,8 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
             }
             //Log.i("License", "Accepted!")
 
-            if (securePrefs.getString("licensed") != "1")
-                securePrefs.put("licensed", "1")
+            if (Utils.securePrefs.getString("licensed") != "1")
+                Utils.securePrefs.put("licensed", "1")
         }
 
         override fun dontAllow(reason: Int) {
@@ -297,8 +292,8 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
             //Log.i("License", "Denied!")
             //Log.i("License", "Reason for denial: $reason")
 
-            if (securePrefs.getString("licensed") != "1")
-                securePrefs.put("licensed", "0")
+            if (Utils.securePrefs.getString("licensed") != "1")
+                Utils.securePrefs.put("licensed", "0")
             unlicensedDialog()
         }
 
@@ -308,8 +303,8 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
                 return
             }
 
-            if (securePrefs.getString("licensed") != "1")
-                securePrefs.put("licensed", "0")
+            if (Utils.securePrefs.getString("licensed") != "1")
+                Utils.securePrefs.put("licensed", "0")
             unlicensedDialog()
         }
     }

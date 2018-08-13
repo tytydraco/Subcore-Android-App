@@ -6,22 +6,13 @@ import android.support.annotation.RequiresApi
 import android.service.quicksettings.Tile
 import android.content.Context
 import android.content.Intent
-import com.topjohnwu.superuser.Shell
-
+import android.content.IntentFilter
 
 @RequiresApi(Build.VERSION_CODES.N)
 class TileService : TileService() {
-    override fun onDestroy() {
-        super.onDestroy()
-    }
-
     override fun onTileAdded() {
         super.onTileAdded()
         toggleTile(false)
-    }
-
-    override fun onTileRemoved() {
-        super.onTileRemoved()
     }
 
     override fun onStartListening() {
@@ -29,17 +20,13 @@ class TileService : TileService() {
         toggleTile(false)
     }
 
-    override fun onStopListening() {
-        super.onStopListening()
-    }
-
     private fun getServiceStatus(): Boolean {
-        val prefs = applicationContext.getSharedPreferences("subcore", Context.MODE_PRIVATE)
-        return prefs.getBoolean("enabled", false)
+        Utils.prefs = getSharedPreferences("subcore", Context.MODE_PRIVATE)
+        return Utils.prefs.getBoolean("enabled", false)
     }
 
     private fun toggleTile(toggle: Boolean = true): Boolean {
-        val tile = this.qsTile
+        val tile = qsTile
         var isActive = getServiceStatus()
         if (toggle)
             isActive = !isActive
@@ -59,24 +46,20 @@ class TileService : TileService() {
         super.onClick()
         val active = toggleTile()
 
-        MainActivity.prefs = getSharedPreferences("subcore", Context.MODE_PRIVATE)
-        MainActivity.prefs.edit().putBoolean("enabled", active).apply()
-        MainActivity.arch = Utils.getArchitecture()
+        Utils.prefs = getSharedPreferences("subcore", Context.MODE_PRIVATE)
+        Utils.prefs.edit().putBoolean("enabled", active).apply()
+        Utils.arch = Utils.getArchitecture()
         Utils.verifyCompat(applicationContext)
-        MainActivity.bin = Utils.getBinName()
-        MainActivity.pathBin = Utils.getBinPath(applicationContext)
+        Utils.bin = Utils.getBinName()
+        Utils.pathBin = Utils.getBinPath(applicationContext)
 
         if (active) {
+            println("Running the thing")
             Utils.writeBin(applicationContext)
-            var extraArgs = ""
-            if (MainActivity.prefs.getBoolean("low_mem", false))
-                extraArgs += "-m "
-            if (MainActivity.prefs.getBoolean("disable_power_aware", false))
-                extraArgs += "-p "
-            val command = "[ `pgrep ${MainActivity.bin}` ] || ${MainActivity.pathBin} $extraArgs &"
-            Shell.su(command).exec()
+            Utils.runBin()
         } else
-            Shell.su("killall ${MainActivity.bin}").exec()
+            Utils.killBin()
+
         val intent = Intent()
         intent.action = filter_refresh_ui
         sendBroadcast(intent)
