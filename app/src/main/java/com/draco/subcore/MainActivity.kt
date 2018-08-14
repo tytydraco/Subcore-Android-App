@@ -29,7 +29,6 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
 
     companion object {
         lateinit var updateUIReceiver: BroadcastReceiver
-        var running = false
         lateinit var optFrag: OptionFragment
         fun isFragInit(): Boolean {
             return try {
@@ -52,7 +51,7 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        Utils.prefs = getSharedPreferences("subcore", Context.MODE_PRIVATE)
+        Utils.prefs = PreferenceManager.getDefaultSharedPreferences(this)
         Utils.editor = Utils.prefs.edit()
 
         val opts = PreferenceManager.getDefaultSharedPreferences(baseContext)
@@ -87,30 +86,6 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
         Shell.Config.setFlags(Shell.FLAG_REDIRECT_STDERR)
         Shell.Config.verboseLogging(BuildConfig.DEBUG)
 
-        optFrag.applyOnBoot = {
-            val isChecked = (optFrag.preferenceManager.findPreference("apply_on_boot") as CheckBoxPreference).isChecked
-            Utils.editor.putBoolean("apply_on_boot", isChecked)
-            Utils.editor.apply()
-        }
-
-        optFrag.lowMem = {
-            val isChecked = (optFrag.preferenceManager.findPreference("low_mem") as CheckBoxPreference).isChecked
-            Utils.editor.putBoolean("low_mem", isChecked)
-            Utils.editor.apply()
-        }
-
-        optFrag.disablePowerAware = {
-            val isChecked = (optFrag.preferenceManager.findPreference("disable_power_aware") as CheckBoxPreference).isChecked
-            Utils.editor.putBoolean("disable_power_aware", isChecked)
-            Utils.editor.apply()
-        }
-
-        optFrag.keepInForeground = {
-            val isChecked = (optFrag.preferenceManager.findPreference("keep_in_foreground") as CheckBoxPreference).isChecked
-            Utils.editor.putBoolean("keep_in_foreground", isChecked)
-            Utils.editor.apply()
-        }
-
         optFrag.about = {
             startActivity(Intent(MainActivity@this, AboutActivity::class.java))
         }
@@ -120,7 +95,7 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
                     .setTitle("Kill All")
                     .setMessage("Are you sure you would like to kill all instances of Subcore?")
                     .setPositiveButton("Yes") { _, _ ->
-                        if (running) {
+                        if (Utils.prefs.getBoolean("enabled", false)) {
                             val popAnim = AnimationUtils.loadAnimation(this, R.anim.pop)
                             toggleButton.startAnimation(popAnim)
 
@@ -136,9 +111,8 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
                                 toggleButton.text = resources.getText(R.string.off)
                                 (MainActivity.optFrag.preferenceManager.findPreference("low_mem") as CheckBoxPreference).isEnabled = true
                                 (MainActivity.optFrag.preferenceManager.findPreference("disable_power_aware") as CheckBoxPreference).isEnabled = true
-                                (MainActivity.optFrag.preferenceManager.findPreference("keep_in_foreground") as CheckBoxPreference).isEnabled = true
                             }
-                            running = false
+                            Utils.editor.putBoolean("enabled", false)
                         }
                     }
                     .setNegativeButton("No", null)
@@ -183,19 +157,15 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
             runOnUiThread {
                 // set the UI elements
                 if (Utils.binRunning()) {
-                    running = true
                     Utils.editor.putBoolean("enabled", true)
                     (optFrag.preferenceManager.findPreference("low_mem") as CheckBoxPreference).isEnabled = false
                     (optFrag.preferenceManager.findPreference("disable_power_aware") as CheckBoxPreference).isEnabled = false
-                    (optFrag.preferenceManager.findPreference("keep_in_foreground") as CheckBoxPreference).isEnabled = false
                     toggleButton.background = ContextCompat.getDrawable(MainActivity@this, R.drawable.rounded_drawable_green)
                     toggleButton.text = resources.getText(R.string.on)
                 } else {
-                    running = false
                     Utils.editor.putBoolean("enabled", false)
                     (optFrag.preferenceManager.findPreference("low_mem") as CheckBoxPreference).isEnabled = true
                     (optFrag.preferenceManager.findPreference("disable_power_aware") as CheckBoxPreference).isEnabled = true
-                    (optFrag.preferenceManager.findPreference("keep_in_foreground") as CheckBoxPreference).isEnabled = true
                     toggleButton.background = ContextCompat.getDrawable(MainActivity@this, R.drawable.rounded_drawable_red)
                     toggleButton.text = resources.getText(R.string.off)
                 }
@@ -217,7 +187,7 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
             toggleButton.background = ContextCompat.getDrawable(this, R.drawable.transition_enable_disable)
             val transition = toggleButton.background as TransitionDrawable
 
-            if (running) {
+            if (Utils.prefs.getBoolean("enabled", false)) {
                 transition.startTransition(300)
             } else {
                 transition.reverseTransition(0)
@@ -225,14 +195,13 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
             }
 
             asyncExec {
-                if (running) {
+                if (Utils.prefs.getBoolean("enabled", false)) {
                     Utils.editor.putBoolean("enabled", false)
                     Utils.killBin()
                     runOnUiThread {
                         toggleButton.text = resources.getText(R.string.off)
                         (optFrag.preferenceManager.findPreference("low_mem") as CheckBoxPreference).isEnabled = true
                         (optFrag.preferenceManager.findPreference("disable_power_aware") as CheckBoxPreference).isEnabled = true
-                        (optFrag.preferenceManager.findPreference("keep_in_foreground") as CheckBoxPreference).isEnabled = true
                     }
                 } else {
                     Utils.editor.putBoolean("enabled", true)
@@ -241,11 +210,9 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
                         toggleButton.text = resources.getText(R.string.on)
                         (optFrag.preferenceManager.findPreference("low_mem") as CheckBoxPreference).isEnabled = false
                         (optFrag.preferenceManager.findPreference("disable_power_aware") as CheckBoxPreference).isEnabled = false
-                        (optFrag.preferenceManager.findPreference("keep_in_foreground") as CheckBoxPreference).isEnabled = false
                     }
                 }
                 Utils.editor.apply()
-                running = !running
             }
         }
 
@@ -256,7 +223,6 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
             Utils.editor.apply()
         }
     }
-
 
     public override fun onDestroy() {
         super.onDestroy()

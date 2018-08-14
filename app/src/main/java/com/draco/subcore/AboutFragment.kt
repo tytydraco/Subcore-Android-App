@@ -10,9 +10,7 @@ import android.widget.ListView
 class AboutFragment : PreferenceFragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         addPreferencesFromResource(R.xml.about)
-
         with(preferenceManager) {
             findPreference("version").setOnPreferenceClickListener {
                 try {

@@ -6,6 +6,7 @@ import android.support.annotation.RequiresApi
 import android.service.quicksettings.Tile
 import android.content.Context
 import android.content.Intent
+import android.preference.PreferenceManager
 
 @RequiresApi(Build.VERSION_CODES.N)
 class TileService : TileService() {
@@ -20,7 +21,7 @@ class TileService : TileService() {
     }
 
     private fun getServiceStatus(): Boolean {
-        Utils.prefs = getSharedPreferences("subcore", Context.MODE_PRIVATE)
+        Utils.prefs = PreferenceManager.getDefaultSharedPreferences(this)
         return Utils.prefs.getBoolean("enabled", false)
     }
 
@@ -44,8 +45,6 @@ class TileService : TileService() {
     override fun onClick() {
         super.onClick()
         val active = toggleTile()
-
-        Utils.prefs = getSharedPreferences("subcore", Context.MODE_PRIVATE)
         Utils.prefs.edit().putBoolean("enabled", active).apply()
         Utils.arch = Utils.getArchitecture()
         Utils.verifyCompat(applicationContext)
@@ -53,7 +52,6 @@ class TileService : TileService() {
         Utils.pathBin = Utils.getBinPath(applicationContext)
 
         if (active) {
-            println("Running the thing")
             Utils.writeBin(applicationContext)
             Utils.runBin()
         } else
