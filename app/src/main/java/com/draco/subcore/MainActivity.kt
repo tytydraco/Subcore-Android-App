@@ -105,12 +105,18 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
             Utils.editor.apply()
         }
 
+        optFrag.keepInForeground = {
+            val isChecked = (optFrag.preferenceManager.findPreference("keep_in_foreground") as CheckBoxPreference).isChecked
+            Utils.editor.putBoolean("keep_in_foreground", isChecked)
+            Utils.editor.apply()
+        }
+
         optFrag.about = {
             startActivity(Intent(MainActivity@this, AboutActivity::class.java))
         }
 
         optFrag.killAll = {
-            AlertDialog.Builder(this)
+            AlertDialog.Builder(this, R.style.DialogTheme)
                     .setTitle("Kill All")
                     .setMessage("Are you sure you would like to kill all instances of Subcore?")
                     .setPositiveButton("Yes") { _, _ ->
@@ -130,6 +136,7 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
                                 toggleButton.text = resources.getText(R.string.off)
                                 (MainActivity.optFrag.preferenceManager.findPreference("low_mem") as CheckBoxPreference).isEnabled = true
                                 (MainActivity.optFrag.preferenceManager.findPreference("disable_power_aware") as CheckBoxPreference).isEnabled = true
+                                (MainActivity.optFrag.preferenceManager.findPreference("keep_in_foreground") as CheckBoxPreference).isEnabled = true
                             }
                             running = false
                         }
@@ -156,7 +163,7 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
 
         asyncExec {
             if (!Shell.rootAccess()) {
-                AlertDialog.Builder(MainActivity@ this)
+                AlertDialog.Builder(MainActivity@ this, R.style.DialogTheme)
                         .setTitle("Root Denied")
                         .setMessage("Root is required to use this application. Please root your device.")
                         .setPositiveButton("Ok") { _, _ ->
@@ -180,6 +187,7 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
                     Utils.editor.putBoolean("enabled", true)
                     (optFrag.preferenceManager.findPreference("low_mem") as CheckBoxPreference).isEnabled = false
                     (optFrag.preferenceManager.findPreference("disable_power_aware") as CheckBoxPreference).isEnabled = false
+                    (optFrag.preferenceManager.findPreference("keep_in_foreground") as CheckBoxPreference).isEnabled = false
                     toggleButton.background = ContextCompat.getDrawable(MainActivity@this, R.drawable.rounded_drawable_green)
                     toggleButton.text = resources.getText(R.string.on)
                 } else {
@@ -187,6 +195,7 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
                     Utils.editor.putBoolean("enabled", false)
                     (optFrag.preferenceManager.findPreference("low_mem") as CheckBoxPreference).isEnabled = true
                     (optFrag.preferenceManager.findPreference("disable_power_aware") as CheckBoxPreference).isEnabled = true
+                    (optFrag.preferenceManager.findPreference("keep_in_foreground") as CheckBoxPreference).isEnabled = true
                     toggleButton.background = ContextCompat.getDrawable(MainActivity@this, R.drawable.rounded_drawable_red)
                     toggleButton.text = resources.getText(R.string.off)
                 }
@@ -223,6 +232,7 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
                         toggleButton.text = resources.getText(R.string.off)
                         (optFrag.preferenceManager.findPreference("low_mem") as CheckBoxPreference).isEnabled = true
                         (optFrag.preferenceManager.findPreference("disable_power_aware") as CheckBoxPreference).isEnabled = true
+                        (optFrag.preferenceManager.findPreference("keep_in_foreground") as CheckBoxPreference).isEnabled = true
                     }
                 } else {
                     Utils.editor.putBoolean("enabled", true)
@@ -231,6 +241,7 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
                         toggleButton.text = resources.getText(R.string.on)
                         (optFrag.preferenceManager.findPreference("low_mem") as CheckBoxPreference).isEnabled = false
                         (optFrag.preferenceManager.findPreference("disable_power_aware") as CheckBoxPreference).isEnabled = false
+                        (optFrag.preferenceManager.findPreference("keep_in_foreground") as CheckBoxPreference).isEnabled = false
                     }
                 }
                 Utils.editor.apply()
@@ -263,7 +274,7 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
     }
 
     private fun unlicensedDialog() {
-        AlertDialog.Builder(MainActivity@this)
+        AlertDialog.Builder(MainActivity@this, R.style.DialogTheme)
                 .setTitle("Unlicensed")
                 .setMessage("This app is potentially stolen, or Google is having an internal server issue.")
                 .setCancelable(false)

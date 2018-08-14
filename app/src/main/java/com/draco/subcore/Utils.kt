@@ -23,7 +23,9 @@ class Utils {
                     extraArgs += "-m "
                 if (prefs.getBoolean("disable_power_aware", false))
                     extraArgs += "-p "
-                val command = "[ `pgrep $bin` ] || $pathBin $extraArgs &"
+                if (prefs.getBoolean("keep_in_foreground", false))
+                    extraArgs += "-f "
+                val command = "[ `pgrep $bin` ] || $pathBin $extraArgs"
                 Shell.su(command).exec()
             }
         }
@@ -79,7 +81,7 @@ class Utils {
         fun verifyCompat(context: Context) {
             if (arch == "mips" || arch == "mips64" || arch == "other") {
                 try {
-                    AlertDialog.Builder(context)
+                    AlertDialog.Builder(context, R.style.DialogTheme)
                             .setTitle("Unsupported Architecture")
                             .setMessage("Your device is unsupported (MIPS).")
                             .setPositiveButton("Ok") { _, _ ->

@@ -8,6 +8,7 @@ class OptionFragment : PreferenceFragment() {
     lateinit var applyOnBoot: () -> Unit
     lateinit var lowMem: () -> Unit
     lateinit var disablePowerAware: () -> Unit
+    lateinit var keepInForeground: () -> Unit
     lateinit var about: () -> Unit
     lateinit var killAll: () -> Unit
 
@@ -29,6 +30,11 @@ class OptionFragment : PreferenceFragment() {
 
             findPreference("disable_power_aware").setOnPreferenceClickListener {
                 disablePowerAware()
+                return@setOnPreferenceClickListener true
+            }
+
+            findPreference("keep_in_foreground").setOnPreferenceClickListener {
+                keepInForeground()
                 return@setOnPreferenceClickListener true
             }
 

@@ -18,6 +18,12 @@
         android:summary="Enable this to bypass battery/charging status when running the Subcore algorithm."
         android:key="disable_power_aware"
         android:enabled="false"/>
+    <CheckBoxPreference
+        android:title="Keep In Foreground"
+        android:defaultValue="false"
+        android:summary="Enable this to constrain Subcore to the app's process, rather than allowing it to fork."
+        android:key="keep_in_foreground"
+        android:enabled="false"/>
     <Preference
         android:title="About"
         android:summary="Extra information about Subcore."
