@@ -13,6 +13,15 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+        android:title="License">
+        <Preference
+            android:title="libsu"
+            android:summary="topjohnwu\nApache License 2.0"
+            android:selectable="false"
+            android:key="libsu" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
         android:title="Support">
         <Preference
             android:title="Contact"
