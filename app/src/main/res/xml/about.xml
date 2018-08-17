@@ -17,7 +17,6 @@
         <Preference
             android:title="libsu"
             android:summary="topjohnwu\nApache License 2.0"
-            android:selectable="false"
             android:key="libsu" />
     </PreferenceCategory>
 
