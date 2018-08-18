@@ -137,14 +137,16 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
 
         asyncExec {
             if (!Shell.rootAccess()) {
-                AlertDialog.Builder(MainActivity@ this, R.style.DialogTheme)
-                        .setTitle("Root Denied")
-                        .setMessage("Root is required to use this application. Please root your device.")
-                        .setPositiveButton("Ok") { _, _ ->
-                            System.exit(1)
-                        }
-                        .setCancelable(false)
-                        .show()
+                runOnUiThread {
+                    AlertDialog.Builder(MainActivity@ this, R.style.DialogTheme)
+                            .setTitle("Root Denied")
+                            .setMessage("Root is required to use this application. Please root your device.")
+                            .setPositiveButton("Ok") { _, _ ->
+                                finish()
+                            }
+                            .setCancelable(false)
+                            .show()
+                }
                 return@asyncExec
             }
 
