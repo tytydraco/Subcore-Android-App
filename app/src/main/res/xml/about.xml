@@ -5,7 +5,6 @@
         <Preference
             android:title="Developer"
             android:summary="Draco (Tyler Nijmeh)"
-            android:selectable="false"
             android:key="developer" />
         <Preference
             android:title="Version"

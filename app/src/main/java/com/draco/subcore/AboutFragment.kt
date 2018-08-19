@@ -11,21 +11,20 @@ import android.widget.ListView
 class AboutFragment : PreferenceFragment() {
 
     lateinit var libsu: () -> Unit
+    lateinit var donate: () -> Unit
+    lateinit var version: () -> Unit
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         addPreferencesFromResource(R.xml.about)
         with(preferenceManager) {
-            findPreference("version").setOnPreferenceClickListener {
-                try {
-                    val intent = Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                    intent.data = Uri.parse("package:${BuildConfig.APPLICATION_ID}")
-                    startActivity(intent)
-                } catch (e: ActivityNotFoundException) {
-                    val intent = Intent(android.provider.Settings.ACTION_MANAGE_APPLICATIONS_SETTINGS)
-                    startActivity(intent)
-                }
+            findPreference("developer").setOnPreferenceClickListener {
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://forum.xda-developers.com/member.php?u=8155542")))
+                return@setOnPreferenceClickListener true
+            }
 
+            findPreference("version").setOnPreferenceClickListener {
+                version()
                 return@setOnPreferenceClickListener true
             }
             findPreference("version").summary = "${BuildConfig.VERSION_NAME}-${if (BuildConfig.DEBUG) "debug" else "release"} (${BuildConfig.VERSION_CODE})"
@@ -46,7 +45,7 @@ class AboutFragment : PreferenceFragment() {
             }
 
             findPreference("donate").setOnPreferenceClickListener {
-                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://paypal.me/TylerNijmeh")))
+                donate()
                 return@setOnPreferenceClickListener true
             }
         }
