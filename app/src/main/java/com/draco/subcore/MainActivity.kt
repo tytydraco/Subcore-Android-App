@@ -113,6 +113,7 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
                                 (MainActivity.optFrag.preferenceManager.findPreference("disable_power_aware") as CheckBoxPreference).isEnabled = true
                             }
                             Utils.editor.putBoolean("enabled", false)
+                            Utils.editor.apply()
                         }
                     }
                     .setNegativeButton("No", null)
