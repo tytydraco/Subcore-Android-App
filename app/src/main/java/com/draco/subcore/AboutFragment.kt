@@ -35,7 +35,9 @@ class AboutFragment : PreferenceFragment() {
             }
 
             findPreference("contact").setOnPreferenceClickListener {
-                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("mailto:tylernij@gmail.com")))
+								try {
+                	startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("mailto:tylernij@gmail.com")))
+								} catch (_: Exception) {}
                 return@setOnPreferenceClickListener true
             }
 
