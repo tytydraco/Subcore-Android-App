@@ -220,7 +220,7 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
         }
 
         if (Utils.prefs.getBoolean("first_run", true)) {
-            if (Build.MANUFACTURER.toLowerCase().contains("samsung"))
+            if (Build.MANUFACTURER.toLowerCase().contains("samsung") || Build.MANUFACTURER.toLowerCase().contains("lg"))
                 Utils.editor.putBoolean("low_mem", true)
             Utils.editor.putBoolean("first_run", false)
             Utils.editor.apply()
