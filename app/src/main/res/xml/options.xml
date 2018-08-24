@@ -18,6 +18,12 @@
         android:summary="Enable this to bypass battery/charging status when running the Subcore algorithm."
         android:key="disable_power_aware"
         android:enabled="false"/>
+    <CheckBoxPreference
+        android:title="Disable Sleep Aware"
+        android:defaultValue="false"
+        android:summary="Enable this to bypass screen state when running the Subcore algorithm."
+        android:key="disable_sleep_aware"
+        android:enabled="false"/>
     <Preference
         android:title="About"
         android:summary="Extra information about Subcore."

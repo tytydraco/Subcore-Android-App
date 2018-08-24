@@ -23,6 +23,8 @@ class Utils {
                     extraArgs += "-m "
                 if (prefs.getBoolean("disable_power_aware", false))
                     extraArgs += "-p "
+                if (prefs.getBoolean("disable_screen_aware", false))
+                    extraArgs += "-s "
                 val command = "[ `pgrep $bin` ] || $pathBin $extraArgs"
                 Shell.su(command).exec()
             }

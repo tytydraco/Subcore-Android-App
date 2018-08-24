@@ -3,10 +3,8 @@ package com.draco.subcore
 import android.annotation.SuppressLint
 import android.content.*
 import android.graphics.drawable.TransitionDrawable
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
 import android.preference.CheckBoxPreference
 import android.preference.Preference
 import android.preference.PreferenceManager
@@ -14,7 +12,6 @@ import android.provider.Settings
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.Toolbar
 import android.view.animation.AnimationUtils
 import android.widget.Button
 import com.google.android.vending.licensing.AESObfuscator
@@ -111,6 +108,7 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
                                 toggleButton.text = resources.getText(R.string.off)
                                 (MainActivity.optFrag.preferenceManager.findPreference("low_mem") as CheckBoxPreference).isEnabled = true
                                 (MainActivity.optFrag.preferenceManager.findPreference("disable_power_aware") as CheckBoxPreference).isEnabled = true
+                                (MainActivity.optFrag.preferenceManager.findPreference("disable_sleep_aware") as CheckBoxPreference).isEnabled = true
                             }
                             Utils.editor.putBoolean("enabled", false)
                             Utils.editor.apply()
@@ -163,12 +161,14 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
                     Utils.editor.putBoolean("enabled", true)
                     (optFrag.preferenceManager.findPreference("low_mem") as CheckBoxPreference).isEnabled = false
                     (optFrag.preferenceManager.findPreference("disable_power_aware") as CheckBoxPreference).isEnabled = false
+                    (optFrag.preferenceManager.findPreference("disable_sleep_aware") as CheckBoxPreference).isEnabled = false
                     toggleButton.background = ContextCompat.getDrawable(MainActivity@this, R.drawable.rounded_drawable_green)
                     toggleButton.text = resources.getText(R.string.on)
                 } else {
                     Utils.editor.putBoolean("enabled", false)
                     (optFrag.preferenceManager.findPreference("low_mem") as CheckBoxPreference).isEnabled = true
                     (optFrag.preferenceManager.findPreference("disable_power_aware") as CheckBoxPreference).isEnabled = true
+                    (optFrag.preferenceManager.findPreference("disable_sleep_aware") as CheckBoxPreference).isEnabled = true
                     toggleButton.background = ContextCompat.getDrawable(MainActivity@this, R.drawable.rounded_drawable_red)
                     toggleButton.text = resources.getText(R.string.off)
                 }
@@ -205,6 +205,7 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
                         toggleButton.text = resources.getText(R.string.off)
                         (optFrag.preferenceManager.findPreference("low_mem") as CheckBoxPreference).isEnabled = true
                         (optFrag.preferenceManager.findPreference("disable_power_aware") as CheckBoxPreference).isEnabled = true
+                        (optFrag.preferenceManager.findPreference("disable_sleep_aware") as CheckBoxPreference).isEnabled = true
                     }
                 } else {
                     Utils.editor.putBoolean("enabled", true)
@@ -213,6 +214,7 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
                         toggleButton.text = resources.getText(R.string.on)
                         (optFrag.preferenceManager.findPreference("low_mem") as CheckBoxPreference).isEnabled = false
                         (optFrag.preferenceManager.findPreference("disable_power_aware") as CheckBoxPreference).isEnabled = false
+                        (optFrag.preferenceManager.findPreference("disable_sleep_aware") as CheckBoxPreference).isEnabled = false
                     }
                 }
                 Utils.editor.apply()
