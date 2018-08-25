@@ -3,6 +3,7 @@ package com.draco.subcore
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Build
+import android.os.Environment
 import android.support.v7.app.AlertDialog
 import com.topjohnwu.superuser.Shell
 
@@ -19,14 +20,22 @@ class Utils {
         fun runBin() {
             asyncExec {
                 var extraArgs = ""
+                var debug = false
                 if (prefs.getBoolean("low_mem", false))
                     extraArgs += "-m "
                 if (prefs.getBoolean("disable_power_aware", false))
                     extraArgs += "-p "
                 if (prefs.getBoolean("disable_screen_aware", false))
                     extraArgs += "-s "
+                if (prefs.getBoolean("enable_debug", false)) {
+                    extraArgs += "-f -d > ${Environment.getExternalStorageDirectory().path}/subcore_debug.txt"
+                    debug = true
+                }
                 val command = "[ `pgrep $bin` ] || $pathBin $extraArgs"
-                Shell.su(command).exec()
+                if (debug)
+                    Runtime.getRuntime().exec("su -c $command")
+                else
+                    Shell.su(command).exec()
             }
         }
 

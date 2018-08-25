@@ -24,6 +24,12 @@
         android:summary="Enable this to bypass screen state when running the Subcore algorithm."
         android:key="disable_sleep_aware"
         android:enabled="false"/>
+    <CheckBoxPreference
+        android:title="Enable debug"
+        android:defaultValue="false"
+        android:summary="Enable this to generate debug logs when reporting a bug. Logs are written to external storage."
+        android:key="enable_debug"
+        android:enabled="false"/>
     <Preference
         android:title="About"
         android:summary="Extra information about Subcore."

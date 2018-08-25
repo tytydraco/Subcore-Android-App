@@ -5,6 +5,7 @@ import android.content.*
 import android.graphics.drawable.TransitionDrawable
 import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.preference.CheckBoxPreference
 import android.preference.Preference
 import android.preference.PreferenceManager
@@ -14,6 +15,7 @@ import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.view.animation.AnimationUtils
 import android.widget.Button
+import android.widget.Toast
 import com.google.android.vending.licensing.AESObfuscator
 import com.google.android.vending.licensing.LicenseChecker
 import com.google.android.vending.licensing.LicenseCheckerCallback
@@ -108,6 +110,7 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
                                 (MainActivity.optFrag.preferenceManager.findPreference("low_mem") as CheckBoxPreference).isEnabled = true
                                 (MainActivity.optFrag.preferenceManager.findPreference("disable_power_aware") as CheckBoxPreference).isEnabled = true
                                 (MainActivity.optFrag.preferenceManager.findPreference("disable_sleep_aware") as CheckBoxPreference).isEnabled = true
+                                (MainActivity.optFrag.preferenceManager.findPreference("enable_debug") as CheckBoxPreference).isEnabled = true
                             }
                             Utils.editor.putBoolean("enabled", false)
                             Utils.editor.apply()
@@ -163,12 +166,14 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
                     (optFrag.preferenceManager.findPreference("low_mem") as CheckBoxPreference).isEnabled = false
                     (optFrag.preferenceManager.findPreference("disable_power_aware") as CheckBoxPreference).isEnabled = false
                     (optFrag.preferenceManager.findPreference("disable_sleep_aware") as CheckBoxPreference).isEnabled = false
+                    (optFrag.preferenceManager.findPreference("enable_debug") as CheckBoxPreference).isEnabled = false
                     toggleButton.text = resources.getText(R.string.on)
                 } else {
                     Utils.editor.putBoolean("enabled", false)
                     (optFrag.preferenceManager.findPreference("low_mem") as CheckBoxPreference).isEnabled = true
                     (optFrag.preferenceManager.findPreference("disable_power_aware") as CheckBoxPreference).isEnabled = true
                     (optFrag.preferenceManager.findPreference("disable_sleep_aware") as CheckBoxPreference).isEnabled = true
+                    (optFrag.preferenceManager.findPreference("enable_debug") as CheckBoxPreference).isEnabled = true
                     toggleButton.text = resources.getText(R.string.off)
                     transition.startTransition(0)
                 }
@@ -203,6 +208,9 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
                         (optFrag.preferenceManager.findPreference("low_mem") as CheckBoxPreference).isEnabled = true
                         (optFrag.preferenceManager.findPreference("disable_power_aware") as CheckBoxPreference).isEnabled = true
                         (optFrag.preferenceManager.findPreference("disable_sleep_aware") as CheckBoxPreference).isEnabled = true
+                        (optFrag.preferenceManager.findPreference("enable_debug") as CheckBoxPreference).isEnabled = true
+                        if (Utils.prefs.getBoolean("enable_debug", false))
+                            Toast.makeText(this, "Debug log stored to ${Environment.getExternalStorageDirectory().path}", Toast.LENGTH_SHORT).show()
                     }
                 } else {
                     Utils.editor.putBoolean("enabled", true)
@@ -212,6 +220,7 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
                         (optFrag.preferenceManager.findPreference("low_mem") as CheckBoxPreference).isEnabled = false
                         (optFrag.preferenceManager.findPreference("disable_power_aware") as CheckBoxPreference).isEnabled = false
                         (optFrag.preferenceManager.findPreference("disable_sleep_aware") as CheckBoxPreference).isEnabled = false
+                        (optFrag.preferenceManager.findPreference("enable_debug") as CheckBoxPreference).isEnabled = false
                     }
                 }
                 Utils.editor.apply()
