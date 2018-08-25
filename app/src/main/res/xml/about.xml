@@ -47,7 +47,7 @@
             android:selectable="false"/>
         <Preference
             android:title="kdrag0n"
-            android:summary="Always there and offering ideas to problems. Also, he helped make the UI look much less disgusting."
+            android:summary="Constantly double-checking Subcore's behavior and reporting bugs whenever necessary."
             android:selectable="false"/>
         <Preference
             android:title="ASHLEY117"

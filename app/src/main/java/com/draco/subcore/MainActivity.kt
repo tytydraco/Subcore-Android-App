@@ -79,7 +79,6 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
                     .commit()
         }
 
-        // You can configure Shell here
         Shell.Config.setFlags(Shell.FLAG_REDIRECT_STDERR)
         Shell.Config.verboseLogging(BuildConfig.DEBUG)
 
@@ -157,43 +156,41 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
 
             runOnUiThread {
                 // set the UI elements
+                toggleButton.background = ContextCompat.getDrawable(this, R.drawable.transition_enable_disable)
+                val transition = toggleButton.background as TransitionDrawable
                 if (Utils.binRunning()) {
                     Utils.editor.putBoolean("enabled", true)
                     (optFrag.preferenceManager.findPreference("low_mem") as CheckBoxPreference).isEnabled = false
                     (optFrag.preferenceManager.findPreference("disable_power_aware") as CheckBoxPreference).isEnabled = false
                     (optFrag.preferenceManager.findPreference("disable_sleep_aware") as CheckBoxPreference).isEnabled = false
-                    toggleButton.background = ContextCompat.getDrawable(MainActivity@this, R.drawable.rounded_drawable_green)
                     toggleButton.text = resources.getText(R.string.on)
                 } else {
                     Utils.editor.putBoolean("enabled", false)
                     (optFrag.preferenceManager.findPreference("low_mem") as CheckBoxPreference).isEnabled = true
                     (optFrag.preferenceManager.findPreference("disable_power_aware") as CheckBoxPreference).isEnabled = true
                     (optFrag.preferenceManager.findPreference("disable_sleep_aware") as CheckBoxPreference).isEnabled = true
-                    toggleButton.background = ContextCompat.getDrawable(MainActivity@this, R.drawable.rounded_drawable_red)
                     toggleButton.text = resources.getText(R.string.off)
+                    transition.startTransition(0)
                 }
                 (optFrag.preferenceManager.findPreference("apply_on_boot") as CheckBoxPreference).isEnabled = true
                 (optFrag.preferenceManager.findPreference("about") as Preference).isEnabled = true
                 (optFrag.preferenceManager.findPreference("kill_all") as Preference).isEnabled = true
 
                 toggleButton.isEnabled = true
+                Utils.editor.apply()
             }
 
             Utils.writeBin(this)
-            Utils.editor.apply()
         }
 
         toggleButton.setOnClickListener {
             val popAnim = AnimationUtils.loadAnimation(this, R.anim.pop)
             toggleButton.startAnimation(popAnim)
-
-            toggleButton.background = ContextCompat.getDrawable(this, R.drawable.transition_enable_disable)
             val transition = toggleButton.background as TransitionDrawable
 
             if (Utils.prefs.getBoolean("enabled", false)) {
                 transition.startTransition(300)
             } else {
-                transition.reverseTransition(0)
                 transition.reverseTransition(300)
             }
 
@@ -222,7 +219,9 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
         }
 
         if (Utils.prefs.getBoolean("first_run", true)) {
-            if (Build.MANUFACTURER.toLowerCase().contains("samsung") || Build.MANUFACTURER.toLowerCase().contains("lg"))
+            if (Build.MANUFACTURER.toLowerCase().contains("samsung") ||
+                    Build.MANUFACTURER.toLowerCase().contains("lge") ||
+                    Build.MANUFACTURER.toLowerCase().contains("sony"))
                 Utils.editor.putBoolean("low_mem", true)
             Utils.editor.putBoolean("first_run", false)
             Utils.editor.apply()
