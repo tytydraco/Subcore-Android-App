@@ -27,6 +27,8 @@ class Utils {
                     extraArgs += "-p "
                 if (prefs.getBoolean("disable_screen_aware", false))
                     extraArgs += "-s "
+                if (prefs.getBoolean("enable_gpu_mode", false))
+                    extraArgs += "-g "
                 if (prefs.getBoolean("enable_debug", false)) {
                     extraArgs += "-f -d > ${Environment.getExternalStorageDirectory().path}/subcore_debug.txt"
                     debug = true

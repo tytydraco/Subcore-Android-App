@@ -110,6 +110,7 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
                                 (MainActivity.optFrag.preferenceManager.findPreference("low_mem") as CheckBoxPreference).isEnabled = true
                                 (MainActivity.optFrag.preferenceManager.findPreference("disable_power_aware") as CheckBoxPreference).isEnabled = true
                                 (MainActivity.optFrag.preferenceManager.findPreference("disable_sleep_aware") as CheckBoxPreference).isEnabled = true
+                                (MainActivity.optFrag.preferenceManager.findPreference("enable_gpu_mode") as CheckBoxPreference).isEnabled = true
                                 (MainActivity.optFrag.preferenceManager.findPreference("enable_debug") as CheckBoxPreference).isEnabled = true
                             }
                             Utils.editor.putBoolean("enabled", false)
@@ -166,6 +167,7 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
                     (optFrag.preferenceManager.findPreference("low_mem") as CheckBoxPreference).isEnabled = false
                     (optFrag.preferenceManager.findPreference("disable_power_aware") as CheckBoxPreference).isEnabled = false
                     (optFrag.preferenceManager.findPreference("disable_sleep_aware") as CheckBoxPreference).isEnabled = false
+                    (optFrag.preferenceManager.findPreference("enable_gpu_mode") as CheckBoxPreference).isEnabled = false
                     (optFrag.preferenceManager.findPreference("enable_debug") as CheckBoxPreference).isEnabled = false
                     toggleButton.text = resources.getText(R.string.on)
                 } else {
@@ -173,6 +175,7 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
                     (optFrag.preferenceManager.findPreference("low_mem") as CheckBoxPreference).isEnabled = true
                     (optFrag.preferenceManager.findPreference("disable_power_aware") as CheckBoxPreference).isEnabled = true
                     (optFrag.preferenceManager.findPreference("disable_sleep_aware") as CheckBoxPreference).isEnabled = true
+                    (optFrag.preferenceManager.findPreference("enable_gpu_mode") as CheckBoxPreference).isEnabled = true
                     (optFrag.preferenceManager.findPreference("enable_debug") as CheckBoxPreference).isEnabled = true
                     toggleButton.text = resources.getText(R.string.off)
                     transition.startTransition(0)
@@ -208,6 +211,7 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
                         (optFrag.preferenceManager.findPreference("low_mem") as CheckBoxPreference).isEnabled = true
                         (optFrag.preferenceManager.findPreference("disable_power_aware") as CheckBoxPreference).isEnabled = true
                         (optFrag.preferenceManager.findPreference("disable_sleep_aware") as CheckBoxPreference).isEnabled = true
+                        (optFrag.preferenceManager.findPreference("enable_gpu_mode") as CheckBoxPreference).isEnabled = true
                         (optFrag.preferenceManager.findPreference("enable_debug") as CheckBoxPreference).isEnabled = true
                         if (Utils.prefs.getBoolean("enable_debug", false))
                             Toast.makeText(this, "Debug log stored to ${Environment.getExternalStorageDirectory().path}", Toast.LENGTH_SHORT).show()
@@ -220,6 +224,7 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
                         (optFrag.preferenceManager.findPreference("low_mem") as CheckBoxPreference).isEnabled = false
                         (optFrag.preferenceManager.findPreference("disable_power_aware") as CheckBoxPreference).isEnabled = false
                         (optFrag.preferenceManager.findPreference("disable_sleep_aware") as CheckBoxPreference).isEnabled = false
+                        (optFrag.preferenceManager.findPreference("enable_gpu_mode") as CheckBoxPreference).isEnabled = false
                         (optFrag.preferenceManager.findPreference("enable_debug") as CheckBoxPreference).isEnabled = false
                     }
                 }
