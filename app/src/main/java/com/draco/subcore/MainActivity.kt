@@ -130,9 +130,8 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
         mLicenseCheckerCallback = MyLicenseCheckerCallback()
         Utils.securePrefs = SecurePreferences(this, "subcore-secure", RSA_PRIVATE_KEY, true)
 
-        /*if (securePrefs.getString("licensed") != "1")
+        if (!BuildConfig.DEBUG && Utils.securePrefs.getString("licensed") != "1")
             doCheck()
-        */
 
         toggleButton = findViewById(R.id.toggle)
         toggleButton.isEnabled = false
