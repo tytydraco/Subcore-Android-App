@@ -213,7 +213,7 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
                         (optFrag.preferenceManager.findPreference("enable_gpu_mode") as CheckBoxPreference).isEnabled = true
                         (optFrag.preferenceManager.findPreference("enable_debug") as CheckBoxPreference).isEnabled = true
                         if (Utils.prefs.getBoolean("enable_debug", false))
-                            Toast.makeText(this, "Debug log stored to ${Environment.getExternalStorageDirectory().path}", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this, "Debug log stored to ${Environment.getExternalStorageDirectory().path}/subcore_debug.txt", Toast.LENGTH_SHORT).show()
                     }
                 } else {
                     Utils.editor.putBoolean("enabled", true)
