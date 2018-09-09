@@ -107,7 +107,7 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
                             Utils.killBin()
                             runOnUiThread {
                                 toggleButton.text = resources.getText(R.string.off)
-                                (MainActivity.optFrag.preferenceManager.findPreference("low_mem") as CheckBoxPreference).isEnabled = true
+                                (MainActivity.optFrag.preferenceManager.findPreference("memory_aware") as CheckBoxPreference).isEnabled = true
                                 (MainActivity.optFrag.preferenceManager.findPreference("disable_power_aware") as CheckBoxPreference).isEnabled = true
                                 (MainActivity.optFrag.preferenceManager.findPreference("disable_sleep_aware") as CheckBoxPreference).isEnabled = true
                                 (MainActivity.optFrag.preferenceManager.findPreference("enable_gpu_mode") as CheckBoxPreference).isEnabled = true
@@ -163,7 +163,7 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
                 val transition = toggleButton.background as TransitionDrawable
                 if (Utils.binRunning()) {
                     Utils.editor.putBoolean("enabled", true)
-                    (optFrag.preferenceManager.findPreference("low_mem") as CheckBoxPreference).isEnabled = false
+                    (optFrag.preferenceManager.findPreference("memory_aware") as CheckBoxPreference).isEnabled = false
                     (optFrag.preferenceManager.findPreference("disable_power_aware") as CheckBoxPreference).isEnabled = false
                     (optFrag.preferenceManager.findPreference("disable_sleep_aware") as CheckBoxPreference).isEnabled = false
                     (optFrag.preferenceManager.findPreference("enable_gpu_mode") as CheckBoxPreference).isEnabled = false
@@ -171,7 +171,7 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
                     toggleButton.text = resources.getText(R.string.on)
                 } else {
                     Utils.editor.putBoolean("enabled", false)
-                    (optFrag.preferenceManager.findPreference("low_mem") as CheckBoxPreference).isEnabled = true
+                    (optFrag.preferenceManager.findPreference("memory_aware") as CheckBoxPreference).isEnabled = true
                     (optFrag.preferenceManager.findPreference("disable_power_aware") as CheckBoxPreference).isEnabled = true
                     (optFrag.preferenceManager.findPreference("disable_sleep_aware") as CheckBoxPreference).isEnabled = true
                     (optFrag.preferenceManager.findPreference("enable_gpu_mode") as CheckBoxPreference).isEnabled = true
@@ -207,7 +207,7 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
                     Utils.killBin()
                     runOnUiThread {
                         toggleButton.text = resources.getText(R.string.off)
-                        (optFrag.preferenceManager.findPreference("low_mem") as CheckBoxPreference).isEnabled = true
+                        (optFrag.preferenceManager.findPreference("memory_aware") as CheckBoxPreference).isEnabled = true
                         (optFrag.preferenceManager.findPreference("disable_power_aware") as CheckBoxPreference).isEnabled = true
                         (optFrag.preferenceManager.findPreference("disable_sleep_aware") as CheckBoxPreference).isEnabled = true
                         (optFrag.preferenceManager.findPreference("enable_gpu_mode") as CheckBoxPreference).isEnabled = true
@@ -220,7 +220,7 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
                     Utils.runBin()
                     runOnUiThread {
                         toggleButton.text = resources.getText(R.string.on)
-                        (optFrag.preferenceManager.findPreference("low_mem") as CheckBoxPreference).isEnabled = false
+                        (optFrag.preferenceManager.findPreference("memory_aware") as CheckBoxPreference).isEnabled = false
                         (optFrag.preferenceManager.findPreference("disable_power_aware") as CheckBoxPreference).isEnabled = false
                         (optFrag.preferenceManager.findPreference("disable_sleep_aware") as CheckBoxPreference).isEnabled = false
                         (optFrag.preferenceManager.findPreference("enable_gpu_mode") as CheckBoxPreference).isEnabled = false
@@ -229,15 +229,6 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
                 }
                 Utils.editor.apply()
             }
-        }
-
-        if (Utils.prefs.getBoolean("first_run", true)) {
-            if (Build.MANUFACTURER.toLowerCase().contains("samsung") ||
-                    Build.MANUFACTURER.toLowerCase().contains("lge") ||
-                    Build.MANUFACTURER.toLowerCase().contains("sony"))
-                Utils.editor.putBoolean("low_mem", true)
-            Utils.editor.putBoolean("first_run", false)
-            Utils.editor.apply()
         }
     }
 

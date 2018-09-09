@@ -21,7 +21,7 @@ class Utils {
             asyncExec {
                 var extraArgs = ""
                 var debug = false
-                if (prefs.getBoolean("low_mem", false))
+                if (prefs.getBoolean("memory_aware", false))
                     extraArgs += "-m "
                 if (prefs.getBoolean("disable_power_aware", false))
                     extraArgs += "-p "

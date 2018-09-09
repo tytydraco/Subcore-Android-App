@@ -7,10 +7,10 @@
         android:key="apply_on_boot"
         android:enabled="false"/>
     <CheckBoxPreference
-        android:title="Low-memory device"
+        android:title="Enable memory aware"
         android:defaultValue="false"
-        android:summary="Enable this for skinned devices (Samsung, LG, etc) to avoid running out of memory."
-        android:key="low_mem"
+        android:summary="Enable this to fully utilize memory on devices with excess RAM (4+ GB and ZRAM)."
+        android:key="memory_aware"
         android:enabled="false"/>
     <CheckBoxPreference
         android:title="Disable power aware"
