@@ -7,7 +7,7 @@ android {
     defaultConfig {
         applicationId "com.draco.subcore"
         minSdkVersion 21
-        targetSdkVersion 27
+        targetSdkVersion 31
         versionCode 5
         versionName "1.2"
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
