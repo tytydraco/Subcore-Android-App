@@ -27,6 +27,5 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.4.0'
     implementation 'com.google.android.material:material:1.4.0'
     implementation 'com.github.topjohnwu:libsu:2.0.0'
-    implementation 'com.android.billingclient:billing:1.1'
     implementation project(path: ':library')
 }

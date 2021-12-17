@@ -29,10 +29,6 @@
             android:title="Other Apps"
             android:summary="See some other applications I have published."
             android:key="other_apps" />
-        <Preference
-            android:title="Donate"
-            android:summary="Help support me and my hobby."
-            android:key="donate" />
     </PreferenceCategory>
 
     <PreferenceCategory

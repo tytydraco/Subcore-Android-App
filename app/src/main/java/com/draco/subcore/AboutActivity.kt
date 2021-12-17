@@ -9,11 +9,9 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import android.text.SpannableString
 import android.text.util.Linkify
-import com.android.billingclient.api.*
 
-class AboutActivity : AppCompatActivity(), PurchasesUpdatedListener {
+class AboutActivity : AppCompatActivity() {
 
-    private lateinit var billingClient: BillingClient
     private lateinit var aboutFrag: AboutFragment
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,35 +48,5 @@ class AboutActivity : AppCompatActivity(), PurchasesUpdatedListener {
                 startActivity(intent)
             }
         }
-
-        billingClient = BillingClient.newBuilder(this).setListener(this).build()
-        setupBillingClient()
-    }
-
-    fun setupBillingClient() {
-        billingClient.startConnection(object : BillingClientStateListener {
-            override fun onBillingSetupFinished(@BillingClient.BillingResponse billingResponseCode: Int) {
-                if (billingResponseCode == BillingClient.BillingResponse.OK) {
-                    setupDonateButton()
-                }
-            }
-            override fun onBillingServiceDisconnected() {
-                setupBillingClient()
-            }
-        })
-    }
-
-    fun setupDonateButton() {
-        aboutFrag.donate = {
-            val flowParams = BillingFlowParams.newBuilder()
-                    .setSku("donation")
-                    .setType(BillingClient.SkuType.INAPP)
-                    .build()
-            billingClient.launchBillingFlow(this, flowParams)
-        }
-    }
-
-    override fun onPurchasesUpdated(@BillingClient.BillingResponse responseCode: Int, purchases: List<Purchase>?) {
-
     }
 }
