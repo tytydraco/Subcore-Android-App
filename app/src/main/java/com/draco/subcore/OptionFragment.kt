@@ -14,12 +14,12 @@ class OptionFragment : PreferenceFragment() {
         addPreferencesFromResource(R.xml.options)
 
         with (preferenceManager) {
-            findPreference("about").setOnPreferenceClickListener {
+            findPreference("about")?.setOnPreferenceClickListener {
                 about()
                 return@setOnPreferenceClickListener true
             }
 
-            findPreference("kill_all").setOnPreferenceClickListener {
+            findPreference("kill_all")?.setOnPreferenceClickListener {
                 killAll()
                 return@setOnPreferenceClickListener true
             }

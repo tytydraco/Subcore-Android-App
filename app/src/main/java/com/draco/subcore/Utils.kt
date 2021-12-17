@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.os.Build
 import android.os.Environment
-import android.support.v7.app.AlertDialog
+import androidx.appcompat.app.AlertDialog
 import com.topjohnwu.superuser.Shell
 
 class Utils {

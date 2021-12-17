@@ -2,7 +2,7 @@ package com.draco.subcore
 
 import android.os.Build
 import android.service.quicksettings.TileService
-import android.support.annotation.RequiresApi
+import androidx.annotation.RequiresApi
 import android.service.quicksettings.Tile
 import android.content.Context
 import android.content.Intent
